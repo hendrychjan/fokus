@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:fokus/getx/app_controller.dart';
 import 'package:fokus/pages/root_page.dart';
+import 'package:get/get.dart';
 
 void main() {
-  runApp(const MainApp());
-}
+  Get.put(AppController());
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(home: RootPage());
-  }
+  runApp(const GetMaterialApp(title: "Fokus", home: RootPage()));
 }
