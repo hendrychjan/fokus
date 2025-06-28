@@ -22,7 +22,6 @@ class _RootPageState extends State<RootPage> {
             currentPageIndex = index;
           });
         },
-        indicatorColor: Colors.green,
         selectedIndex: currentPageIndex,
         destinations: const <Widget>[
           /// Destinations
