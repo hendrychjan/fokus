@@ -73,7 +73,7 @@ class _TagsPageState extends State<TagsPage> {
       ),
       // Display a list of all tags as the main page content
       body: StreamBuilder<List<Tag>>(
-        stream: Tag().getAllStream(),
+        stream: Tag.getAllStream(),
         builder: (context, snapshot) {
           // Check the stream state
           if (snapshot.connectionState == ConnectionState.waiting) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fokus/components/delete_dialog.dart';
 import 'package:fokus/models/tag.dart';
 import 'package:get/get.dart';
 
@@ -63,22 +64,11 @@ class TagForm extends StatelessWidget {
   /// Show a delete confirmation dialog and fire the provided delete handler
   void _handleDelete() {
     Get.dialog(
-      AlertDialog(
-        title: Text("Delete tag?"),
-        content: Text("Tag ${initialValue!.name} will be permanently deleted."),
-        actions: [
-          TextButton(
-            onPressed: Get.back,
-            child: Text("Cancel", style: TextStyle(color: Colors.grey)),
-          ),
-          TextButton(
-            onPressed: () async {
-              await onDelete!(initialValue!);
-              Get.back();
-            },
-            child: Text("Delete", style: TextStyle(color: Colors.red)),
-          ),
-        ],
+      DeleteDialog<Tag>(
+        titleText: "Delete tag?",
+        contentText: "Tag ${initialValue!.name} will be permanently deleted.",
+        onDelete: onDelete!,
+        deleteTarget: initialValue!,
       ),
     );
   }

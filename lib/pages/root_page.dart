@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fokus/pages/history/history_page.dart';
 import 'package:fokus/pages/stats/stats_page.dart';
 import 'package:fokus/pages/tags/tags_page.dart';
 import 'package:fokus/pages/timer/timer_page.dart';
@@ -31,6 +32,11 @@ class _RootPageState extends State<RootPage> {
             label: 'Timer',
           ),
           NavigationDestination(
+            selectedIcon: Icon(Icons.fast_rewind),
+            icon: Icon(Icons.fast_rewind_outlined),
+            label: "History",
+          ),
+          NavigationDestination(
             selectedIcon: Icon(Icons.bar_chart),
             icon: Icon(Icons.bar_chart_outlined),
             label: 'Stats',
@@ -45,6 +51,7 @@ class _RootPageState extends State<RootPage> {
       body: <Widget>[
         /// Pages
         const TimerPage(),
+        const HistoryPage(),
         const StatsPage(),
         const TagsPage(),
       ][currentPageIndex],

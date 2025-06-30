@@ -8,6 +8,8 @@ final db = AppController.to.isarService.db!;
 @collection
 class Tag {
   late Id id = Isar.autoIncrement;
+
+  /// Name of the tag
   late String name;
 
   /// Save (create or update) this tag
@@ -25,12 +27,12 @@ class Tag {
   }
 
   /// Get all tags
-  Future<List<Tag>> getAll() async {
+  static Future<List<Tag>> getAll() async {
     return await db.tags.where().findAll();
   }
 
   /// Get all tags in a stream, constantly updated
-  Stream<List<Tag>> getAllStream() async* {
+  static Stream<List<Tag>> getAllStream() async* {
     yield* db.tags.where().watch(fireImmediately: true);
   }
 }
