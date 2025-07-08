@@ -57,7 +57,7 @@ class _RootPageState extends State<RootPage> {
       body: <Widget>[
         /// Pages
         const StatsPage(),
-        const HistoryPage(),
+        HistoryPage(),
         const SessionPage(),
         TagsPage(),
         CategoriesPage(),

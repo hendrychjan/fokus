@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 enum FormViewType { fullscreen, dialog }
 
-abstract class FormBase<T> extends StatelessWidget {
+abstract class FormBase<T> extends StatefulWidget {
   /// Form control field
   final GlobalKey<FormState> formKey;
 
@@ -28,7 +28,7 @@ abstract class FormBase<T> extends StatelessWidget {
   /// If supplied, the "delete" button in appbar is shown
   final Future<void> Function(T)? onDelete;
 
-  FormBase({
+  const FormBase({
     super.key,
     required this.formKey,
     required this.submitText,
@@ -37,20 +37,10 @@ abstract class FormBase<T> extends StatelessWidget {
     this.initialValue,
     this.onDelete,
     this.formViewType = FormViewType.fullscreen,
-  }) {
-    // Here, the `mapExisingData` function isn't called directly because it
-    // could happen that the parent/child class isn't fully loaded and thus the
-    // call could fail or end with unexpected behavior (race conditions)
-    _loadInitial();
-  }
+  });
 
-  /// Use the child provided function for value mapping of provided initial
-  /// object to the form fields
-  void _loadInitial() {
-    if (initialValue == null) return;
-
-    mapObjectToForm();
-  }
+  @override
+  State<FormBase<T>> createState() => _FormBaseState<T>();
 
   /// Map the object to form fields
   void mapObjectToForm();
@@ -58,71 +48,58 @@ abstract class FormBase<T> extends StatelessWidget {
   /// Map the form field values to the object
   T mapFormToObject(T? initial);
 
+  Widget buildFormFields(BuildContext context);
+}
+
+class _FormBaseState<T> extends State<FormBase<T>> {
   /// Validate fields and fire the provided submit handler
   void _handleSubmit() async {
-    if (!formKey.currentState!.validate()) return;
+    if (!widget.formKey.currentState!.validate()) return;
 
     // Update the values
-    T object = mapFormToObject(initialValue);
+    T object = widget.mapFormToObject(widget.initialValue);
 
     // Submit with the new version
-    await onSubmit(object);
+    await widget.onSubmit(object);
   }
 
   /// Show a delete confirmation dialog and fire the provided delete handler
   void _handleDelete() {
-    if (initialValue == null) return;
+    if (widget.initialValue == null) return;
 
     Get.dialog(
       DeleteDialog<T>(
         titleText: "Delete?",
         contentText: "The item will be permanently deleted.",
-        onDelete: onDelete!,
-        deleteTarget: initialValue as T,
+        onDelete: widget.onDelete!,
+        deleteTarget: widget.initialValue as T,
       ),
     );
   }
 
-  /// Show a date-time picker and update the controller with the selected value
-  Future<void> pickDateTime(
-    BuildContext context,
-    TextEditingController controller,
-  ) async {
-    final selectedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (selectedDate == null) return;
+  @override
+  void initState() {
+    super.initState();
 
-    final selectedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (selectedTime == null) return;
+    /// Use the child provided function for value mapping of provided initial
+    /// object to the form fields
+    if (widget.initialValue == null) return;
 
-    final combinedDateTime = DateTime(
-      selectedDate.year,
-      selectedDate.month,
-      selectedDate.day,
-      selectedTime.hour,
-      selectedTime.minute,
-    );
-    controller.text = combinedDateTime.toIso8601String();
+    widget.mapObjectToForm();
   }
-
-  Widget buildFormFields(BuildContext context);
 
   @override
   Widget build(BuildContext context) {
-    if (formViewType == FormViewType.fullscreen) {
+    if (widget.formViewType == FormViewType.fullscreen) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(title),
+          title: Text(widget.title),
           actions: [
-            TextButton(onPressed: _handleSubmit, child: Text(submitText)),
-            if (initialValue != null)
+            TextButton(
+              onPressed: _handleSubmit,
+              child: Text(widget.submitText),
+            ),
+            if (widget.initialValue != null)
               TextButton(
                 onPressed: _handleDelete,
                 child: Text("Delete", style: TextStyle(color: Colors.red)),
@@ -131,11 +108,14 @@ abstract class FormBase<T> extends StatelessWidget {
         ),
         body: Padding(
           padding: const EdgeInsets.all(16),
-          child: Form(key: formKey, child: buildFormFields(context)),
+          child: Form(
+            key: widget.formKey,
+            child: widget.buildFormFields(context),
+          ),
         ),
       );
     } else {
-      return buildFormFields(context);
+      return widget.buildFormFields(context);
     }
   }
 }
