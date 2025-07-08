@@ -59,7 +59,7 @@ class _RootPageState extends State<RootPage> {
         const StatsPage(),
         const HistoryPage(),
         const SessionPage(),
-        const TagsPage(),
+        TagsPage(),
         const CategoriesPage(),
       ][currentPageIndex],
     );
