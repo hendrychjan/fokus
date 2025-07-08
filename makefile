@@ -1,6 +1,8 @@
 print_status = printf "\033[1m[MAKE]: %s\033[0m\n"
 
-all: install_pub_deps run_build_runner
+all: prep_dev
+
+prep_dev: install_pub_deps run_build_runner
 
 install_pub_deps:
 	@$(print_status) "Installing pub dependencies"
