@@ -17,14 +17,9 @@ const CategorySchema = CollectionSchema(
   name: r'Category',
   id: 5751694338128944171,
   properties: {
-    r'category': PropertySchema(
+    r'title': PropertySchema(
       id: 0,
-      name: r'category',
-      type: IsarType.string,
-    ),
-    r'icon': PropertySchema(
-      id: 1,
-      name: r'icon',
+      name: r'title',
       type: IsarType.string,
     )
   },
@@ -48,8 +43,7 @@ int _categoryEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  bytesCount += 3 + object.category.length * 3;
-  bytesCount += 3 + object.icon.length * 3;
+  bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
 
@@ -59,8 +53,7 @@ void _categorySerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.category);
-  writer.writeString(offsets[1], object.icon);
+  writer.writeString(offsets[0], object.title);
 }
 
 Category _categoryDeserialize(
@@ -70,9 +63,8 @@ Category _categoryDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Category();
-  object.category = reader.readString(offsets[0]);
-  object.icon = reader.readString(offsets[1]);
   object.id = id;
+  object.title = reader.readString(offsets[0]);
   return object;
 }
 
@@ -84,8 +76,6 @@ P _categoryDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readString(offset)) as P;
-    case 1:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -181,266 +171,6 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
 
 extension CategoryQueryFilter
     on QueryBuilder<Category, Category, QFilterCondition> {
-  QueryBuilder<Category, Category, QAfterFilterCondition> categoryEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'category',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> categoryGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'category',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> categoryLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'category',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> categoryBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'category',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> categoryStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'category',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> categoryEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'category',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> categoryContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'category',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> categoryMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'category',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> categoryIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'category',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> categoryIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'category',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> iconEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'icon',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> iconGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'icon',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> iconLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'icon',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> iconBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'icon',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> iconStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'icon',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> iconEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'icon',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> iconContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'icon',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> iconMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'icon',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> iconIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'icon',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> iconIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'icon',
-        value: '',
-      ));
-    });
-  }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -492,6 +222,136 @@ extension CategoryQueryFilter
       ));
     });
   }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> titleEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'title',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> titleGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'title',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> titleLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'title',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> titleBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'title',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> titleStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'title',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> titleEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'title',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> titleContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'title',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> titleMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'title',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> titleIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'title',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> titleIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'title',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension CategoryQueryObject
@@ -501,57 +361,21 @@ extension CategoryQueryLinks
     on QueryBuilder<Category, Category, QFilterCondition> {}
 
 extension CategoryQuerySortBy on QueryBuilder<Category, Category, QSortBy> {
-  QueryBuilder<Category, Category, QAfterSortBy> sortByCategory() {
+  QueryBuilder<Category, Category, QAfterSortBy> sortByTitle() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'category', Sort.asc);
+      return query.addSortBy(r'title', Sort.asc);
     });
   }
 
-  QueryBuilder<Category, Category, QAfterSortBy> sortByCategoryDesc() {
+  QueryBuilder<Category, Category, QAfterSortBy> sortByTitleDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'category', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterSortBy> sortByIcon() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'icon', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterSortBy> sortByIconDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'icon', Sort.desc);
+      return query.addSortBy(r'title', Sort.desc);
     });
   }
 }
 
 extension CategoryQuerySortThenBy
     on QueryBuilder<Category, Category, QSortThenBy> {
-  QueryBuilder<Category, Category, QAfterSortBy> thenByCategory() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'category', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterSortBy> thenByCategoryDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'category', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterSortBy> thenByIcon() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'icon', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterSortBy> thenByIconDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'icon', Sort.desc);
-    });
-  }
-
   QueryBuilder<Category, Category, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -563,21 +387,26 @@ extension CategoryQuerySortThenBy
       return query.addSortBy(r'id', Sort.desc);
     });
   }
+
+  QueryBuilder<Category, Category, QAfterSortBy> thenByTitle() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'title', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterSortBy> thenByTitleDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'title', Sort.desc);
+    });
+  }
 }
 
 extension CategoryQueryWhereDistinct
     on QueryBuilder<Category, Category, QDistinct> {
-  QueryBuilder<Category, Category, QDistinct> distinctByCategory(
+  QueryBuilder<Category, Category, QDistinct> distinctByTitle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'category', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<Category, Category, QDistinct> distinctByIcon(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'icon', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'title', caseSensitive: caseSensitive);
     });
   }
 }
@@ -590,15 +419,9 @@ extension CategoryQueryProperty
     });
   }
 
-  QueryBuilder<Category, String, QQueryOperations> categoryProperty() {
+  QueryBuilder<Category, String, QQueryOperations> titleProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'category');
-    });
-  }
-
-  QueryBuilder<Category, String, QQueryOperations> iconProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'icon');
+      return query.addPropertyName(r'title');
     });
   }
 }

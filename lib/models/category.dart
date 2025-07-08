@@ -10,10 +10,7 @@ class Category {
   late Id id = Isar.autoIncrement;
 
   /// Title of the category
-  late String category;
-
-  /// Icon representing the category
-  late String icon;
+  late String title;
 
   /// Save (create or update) this category
   Future<void> save() async {
