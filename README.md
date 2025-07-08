@@ -1,3 +1,6 @@
 # fokus
 
-A new Flutter project.
+Forest 2.0
+
+## Mockup
+![](resources/mockup/mockup.drawio.png)
