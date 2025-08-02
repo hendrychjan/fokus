@@ -40,12 +40,6 @@ const SessionRecordSchema = CollectionSchema(
   idName: r'id',
   indexes: {},
   links: {
-    r'category': LinkSchema(
-      id: 6351822216100486572,
-      name: r'category',
-      target: r'Category',
-      single: true,
-    ),
     r'tags': LinkSchema(
       id: -8854503451637913225,
       name: r'tags',
@@ -123,13 +117,12 @@ Id _sessionRecordGetId(SessionRecord object) {
 }
 
 List<IsarLinkBase<dynamic>> _sessionRecordGetLinks(SessionRecord object) {
-  return [object.category, object.tags];
+  return [object.tags];
 }
 
 void _sessionRecordAttach(
     IsarCollection<dynamic> col, Id id, SessionRecord object) {
   object.id = id;
-  object.category.attach(col, col.isar.collection<Category>(), r'category', id);
   object.tags.attach(col, col.isar.collection<Tag>(), r'tags', id);
 }
 
@@ -541,20 +534,6 @@ extension SessionRecordQueryObject
 
 extension SessionRecordQueryLinks
     on QueryBuilder<SessionRecord, SessionRecord, QFilterCondition> {
-  QueryBuilder<SessionRecord, SessionRecord, QAfterFilterCondition> category(
-      FilterQuery<Category> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'category');
-    });
-  }
-
-  QueryBuilder<SessionRecord, SessionRecord, QAfterFilterCondition>
-      categoryIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'category', 0, true, 0, true);
-    });
-  }
-
   QueryBuilder<SessionRecord, SessionRecord, QAfterFilterCondition> tags(
       FilterQuery<Tag> q) {
     return QueryBuilder.apply(this, (query) {

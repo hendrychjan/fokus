@@ -37,8 +37,22 @@ class Tag {
     return await db.tags.where().findAll();
   }
 
+  /// Get all tags synchronously
+  /// (viable only when the number of tags in db is low)
+  static List<Tag> getAllSync() {
+    return db.tags.where().findAllSync();
+  }
+
   /// Get all tags in a stream, constantly updated
   static Stream<List<Tag>> getAllStream() async* {
     yield* db.tags.where().watch(fireImmediately: true);
   }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) || other is Tag && id == other.id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }

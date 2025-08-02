@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fokus/pages/categories/categories_page.dart';
 import 'package:fokus/pages/history/history_page.dart';
 import 'package:fokus/pages/session/session_page.dart';
 import 'package:fokus/pages/stats/stats_page.dart';
@@ -13,7 +12,7 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
-  int currentPageIndex = 0;
+  int currentPageIndex = 2;
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +46,6 @@ class _RootPageState extends State<RootPage> {
             icon: Icon(Icons.sell_outlined),
             label: "Tags",
           ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.category),
-            icon: Icon(Icons.category_outlined),
-            label: "Categories",
-          ),
         ],
       ),
       body: <Widget>[
@@ -60,7 +54,6 @@ class _RootPageState extends State<RootPage> {
         HistoryPage(),
         const SessionPage(),
         TagsPage(),
-        CategoriesPage(),
       ][currentPageIndex],
     );
   }

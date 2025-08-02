@@ -1,4 +1,3 @@
-import 'package:fokus/models/category.dart';
 import 'package:fokus/models/tag.dart';
 import 'package:fokus/services/app_controller.dart';
 import 'package:isar/isar.dart';
@@ -20,17 +19,20 @@ class SessionRecord {
   /// An optional note to the recorded session
   late String? note;
 
-  /// A category for the session
-  final category = IsarLink<Category>();
-
   /// Tags for the session
   final tags = IsarLinks<Tag>();
 
   /// Save (create or update) this session record
   Future<void> save() async {
     await db.writeTxn(() async {
+      tags.save();
       await db.sessionRecords.put(this);
     });
+  }
+
+  /// Load all link fields synchronously
+  void loadSync() {
+    tags.loadSync();
   }
 
   /// Delete this session record

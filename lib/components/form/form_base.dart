@@ -56,6 +56,8 @@ class _FormBaseState<T> extends State<FormBase<T>> {
   void _handleSubmit() async {
     if (!widget.formKey.currentState!.validate()) return;
 
+    widget.formKey.currentState?.save();
+
     // Update the values
     T object = widget.mapFormToObject(widget.initialValue);
 
