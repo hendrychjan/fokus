@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:fokus/components/form/form_base.dart';
 import 'package:fokus/forms/session_record_form.dart';
 import 'package:fokus/models/session_record.dart';
 import 'package:fokus/services/app_controller.dart';
@@ -78,9 +79,6 @@ class _SessionPageState extends State<SessionPage> {
         },
       ),
     );
-
-    // Stop the timer display updating event
-    _stopDisplayTimer();
   }
 
   void _handleCancelSession() {
@@ -104,6 +102,12 @@ class _SessionPageState extends State<SessionPage> {
 
     super.initState();
   }
+
+  // @override
+  // void didChangeDependencies() {
+
+  //   super.didChangeDependencies();
+  // }
 
   @override
   void dispose() {
