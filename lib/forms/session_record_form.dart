@@ -87,8 +87,6 @@ class SessionRecordForm extends FormBase<SessionRecord> {
   SessionRecord mapFormToObject(SessionRecord? initial) {
     SessionRecord sessionRecord = initial ?? SessionRecord();
 
-    sessionRecord.loadSync();
-
     sessionRecord.sessionStart = DateTime.parse(_sessionStartController.text);
     sessionRecord.sessionEnd = DateTime.parse(_sessionEndController.text);
     sessionRecord.note = _noteController.text;

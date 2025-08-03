@@ -101,7 +101,7 @@ class _FormBaseState<T> extends State<FormBase<T>> {
               onPressed: _handleSubmit,
               child: Text(widget.submitText),
             ),
-            if (widget.initialValue != null)
+            if (widget.initialValue != null && widget.onDelete != null)
               TextButton(
                 onPressed: _handleDelete,
                 child: Text("Delete", style: TextStyle(color: Colors.red)),

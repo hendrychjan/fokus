@@ -25,8 +25,8 @@ class SessionRecord {
   /// Save (create or update) this session record
   Future<void> save() async {
     await db.writeTxn(() async {
-      tags.save();
       await db.sessionRecords.put(this);
+      await tags.save();
     });
   }
 
