@@ -4,12 +4,14 @@ class DateTimeFormField extends StatelessWidget {
   final TextEditingController controller;
   final InputDecoration? decoration;
   final String? Function(String?)? validator;
+  final void Function(DateTime)? onChange;
 
   DateTimeFormField({
     super.key,
     required this.controller,
     this.decoration,
     this.validator,
+    this.onChange,
   }) {
     _innerFieldController.text = controller.text;
   }
@@ -53,6 +55,8 @@ class DateTimeFormField extends StatelessWidget {
     // Save it in the outside controller as well as the inner, display one
     controller.text = selectedDateTime.toIso8601String();
     _innerFieldController.text = selectedDateTime.toString();
+
+    if (onChange != null) onChange!(selectedDateTime);
   }
 
   @override

@@ -7,7 +7,7 @@ void main() {
     GetMaterialApp(
       title: "Fokus",
       home: const InitPage(),
-      theme: ThemeData(colorSchemeSeed: Colors.green, useMaterial3: true),
+      theme: ThemeData(colorSchemeSeed: Colors.blue, useMaterial3: true),
     ),
   );
 }

@@ -13,7 +13,7 @@ class InitPage extends StatelessWidget {
     await InitService.initApp();
 
     // Go to the root page
-    Get.offAll(RootPage());
+    Get.offAll(() => RootPage());
   }
 
   @override

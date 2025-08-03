@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fokus/forms/session_record_form.dart';
 import 'package:fokus/models/session_record.dart';
+import 'package:fokus/services/app_controller.dart';
 import 'package:get/get.dart';
 
 class HistoryPage extends StatelessWidget {
@@ -26,7 +27,7 @@ class HistoryPage extends StatelessWidget {
   /// Open a dialog for creating a new session record
   void _openCreateDialog() {
     Get.to(
-      SessionRecordForm(
+      () => SessionRecordForm(
         formKey: createSessionRecordFormKey,
         title: "Create a session record",
         submitText: "Create",
@@ -39,7 +40,7 @@ class HistoryPage extends StatelessWidget {
   /// Open a dialog for editing session records
   void _openEditDialog(SessionRecord sessionRecord) {
     Get.to(
-      SessionRecordForm(
+      () => SessionRecordForm(
         formKey: updateSessionRecordFormKey,
         submitText: "Update",
         title: "Update a record",
@@ -56,16 +57,47 @@ class HistoryPage extends StatelessWidget {
     int index,
     List<SessionRecord> sessionRecords,
   ) {
+    bool isDifferentDay(DateTime a, DateTime b) =>
+        a.year != b.year || a.month != b.month || a.day != b.day;
+
+    String formatDateDivider(DateTime d) {
+      if (isDifferentDay(DateTime.now(), d)) {
+        return "${d.day}. ${d.month}. ${d.year}";
+      } else {
+        return "Today";
+      }
+    }
+
     final sessionRecord = sessionRecords[index];
 
-    return GestureDetector(
-      onTap: () => _openEditDialog(sessionRecord),
-      child: ListTile(
-        title: Text(
-          "${sessionRecord.sessionStart.toString()} - ${sessionRecord.sessionEnd.toString()}",
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if ((index == 0) ||
+            (isDifferentDay(
+              sessionRecords[index - 1].sessionStart,
+              sessionRecord.sessionStart,
+            ))) ...[
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Text(
+              formatDateDivider(sessionRecord.sessionStart),
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+        GestureDetector(
+          onTap: () => _openEditDialog(sessionRecord),
+          child: ListTile(
+            title: Text(
+              AppController.formatDurationAsStopwatch(
+                sessionRecord.sessionEnd.difference(sessionRecord.sessionStart),
+              ),
+            ),
+            trailing: Icon(Icons.arrow_right),
+          ),
         ),
-        trailing: Icon(Icons.arrow_right),
-      ),
+      ],
     );
   }
 
@@ -78,7 +110,9 @@ class HistoryPage extends StatelessWidget {
         child: Icon(Icons.add),
       ),
       body: StreamBuilder<List<SessionRecord>>(
-        stream: SessionRecord.getAllStream(),
+        stream: SessionRecord.getAllStream().map(
+          (list) => list.reversed.toList(),
+        ),
         builder: (context, snapshot) {
           // Check the stream state
           if (snapshot.connectionState == ConnectionState.waiting) {

@@ -1,7 +1,5 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:fokus/components/form/form_base.dart';
 import 'package:fokus/forms/session_record_form.dart';
 import 'package:fokus/models/session_record.dart';
 import 'package:fokus/services/app_controller.dart';
@@ -19,15 +17,6 @@ class _SessionPageState extends State<SessionPage> {
   final _appCtl = AppController.to;
   int _seconds = 0;
   late Timer _sessionTimer;
-
-  String _formatDuration(int sec) {
-    Duration d = Duration(seconds: sec);
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(d.inHours);
-    final minutes = twoDigits(d.inMinutes.remainder(60));
-    final seconds = twoDigits(d.inSeconds.remainder(60));
-    return "$hours:$minutes:$seconds";
-  }
 
   void _startDisplayTimer({int initialSeconds = 0}) {
     setState(() {
@@ -66,8 +55,8 @@ class _SessionPageState extends State<SessionPage> {
     sessionRecord.sessionEnd = DateTime.now();
     sessionRecord.note = "";
 
-    Get.dialog(
-      SessionRecordForm(
+    Get.to(
+      () => SessionRecordForm(
         formKey: _saveSessionRecordFormKey,
         submitText: "Save",
         title: "Save session record",
@@ -75,6 +64,7 @@ class _SessionPageState extends State<SessionPage> {
         onSubmit: (sessionRecord) async {
           sessionRecord.save();
           _appCtl.sessionService.stopSession();
+          _stopDisplayTimer();
           Get.back();
         },
       ),
@@ -103,12 +93,6 @@ class _SessionPageState extends State<SessionPage> {
     super.initState();
   }
 
-  // @override
-  // void didChangeDependencies() {
-
-  //   super.didChangeDependencies();
-  // }
-
   @override
   void dispose() {
     if (AppController.to.sessionIsRunning.value) _sessionTimer.cancel();
@@ -124,7 +108,10 @@ class _SessionPageState extends State<SessionPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_formatDuration(_seconds), style: TextStyle(fontSize: 40)),
+            Text(
+              AppController.formatDurationAsStopwatchFromSec(_seconds),
+              style: TextStyle(fontSize: 40),
+            ),
             SizedBox(height: 15),
             Obx(
               () => Row(
