@@ -14,7 +14,7 @@ To create a form for an object, the developer should follow these simple steps:
 1. create a class `ObjectXXXForm` that extends the `FormBase<T>` class _with the correct type!_
 2. create `TextEditingController`s for all required form fields
 3. select "create 3 overrides", and implement those functions
-4. select "add parent's parameters to constructor"
+4. select "create constructor to call super"
 5. manually add the optional (but likely required in the upper level component) fields into the form's constructor:
 
 ```

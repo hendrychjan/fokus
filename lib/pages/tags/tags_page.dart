@@ -24,7 +24,7 @@ class TagsPage extends StatelessWidget {
   /// Open a dialog for creating a new tag
   void _openCreateDialog() {
     Get.to(
-      TagForm(
+      () => TagForm(
         formKey: createTagFormKey,
         title: "Create a tag",
         submitText: "Create",
@@ -37,7 +37,7 @@ class TagsPage extends StatelessWidget {
   /// Open a dialog for editing tags
   void _openEditDialog(Tag tag) {
     Get.to(
-      TagForm(
+      () => TagForm(
         formKey: updateTagFormKey,
         submitText: "Update",
         title: "Update a tag",

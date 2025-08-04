@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fokus/components/color_form_field.dart';
-import 'package:fokus/components/form_base.dart';
+import 'package:fokus/components/form/color_form_field.dart';
+import 'package:fokus/components/form/form_base.dart';
 import 'package:fokus/models/tag.dart';
 
 class TagForm extends FormBase<Tag> {
@@ -40,16 +40,24 @@ class TagForm extends FormBase<Tag> {
       children: [
         TextFormField(
           controller: _titleController,
-          decoration: InputDecoration(labelText: "Title"),
+          decoration: InputDecoration(
+            labelText: "Title",
+            prefixIcon: Icon(Icons.edit),
+            border: OutlineInputBorder(),
+          ),
           validator: (value) {
             if (value!.isEmpty) return "Enter a title";
             return null;
           },
         ),
-
+        SizedBox(height: 16),
         ColorFormField(
           controller: _colorController,
-          decoration: InputDecoration(labelText: "Color"),
+          decoration: InputDecoration(
+            labelText: "Color",
+            prefixIcon: Icon(Icons.color_lens),
+            border: OutlineInputBorder(),
+          ),
           validator: (value) {
             if (value!.isEmpty) return "Select a color";
             return null;
