@@ -51,7 +51,7 @@ const SessionRecordSchema = CollectionSchema(
   getId: _sessionRecordGetId,
   getLinks: _sessionRecordGetLinks,
   attach: _sessionRecordAttach,
-  version: '3.1.0+1',
+  version: '3.1.8',
 );
 
 int _sessionRecordEstimateSize(
