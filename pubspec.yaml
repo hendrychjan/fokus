@@ -6,14 +6,31 @@ version: 0.1.0
 environment:
   sdk: ^3.8.1
 
+isar_version: &isar_version ^3.1.0+1
+
 dependencies:
   flutter:
     sdk: flutter
+  flutter_colorpicker: ^1.1.0
+  get: ^4.7.2
+  get_storage: ^2.1.1
+  isar: 
+    version: *isar_version
+    hosted: https://pub.isar-community.dev/
+  isar_flutter_libs: # contains Isar Core
+    version: *isar_version
+    hosted: https://pub.isar-community.dev/
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  isar_generator: 
+    version: *isar_version
+    hosted: https://pub.isar-community.dev/
+  build_runner: ^2.4.13
+  flutter_launcher_icons: "^0.14.4"
 
 flutter:
   uses-material-design: true
