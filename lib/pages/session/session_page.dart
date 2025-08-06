@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:fokus/components/confirm_dialog.dart';
 import 'package:fokus/forms/session_record_form.dart';
 import 'package:fokus/models/session_record.dart';
 import 'package:fokus/services/app_controller.dart';
@@ -37,7 +38,7 @@ class _SessionPageState extends State<SessionPage> {
     _sessionTimer.cancel();
   }
 
-  Future<void> _handleStartSession() async {
+  Future<void> _onStartSession() async {
     if (_appCtl.sessionIsRunning.value) return;
 
     // Start the session
@@ -47,7 +48,7 @@ class _SessionPageState extends State<SessionPage> {
     _startDisplayTimer();
   }
 
-  void _handleStopSession() {
+  void _onStopSession() {
     if (!_appCtl.sessionIsRunning.value) return;
 
     SessionRecord sessionRecord = SessionRecord();
@@ -71,13 +72,26 @@ class _SessionPageState extends State<SessionPage> {
     );
   }
 
-  void _handleCancelSession() {
+  void _onCancelSession() {
     if (!_appCtl.sessionIsRunning.value) return;
 
-    // Stop the session
-    _appCtl.sessionService.stopSession();
-
-    _stopDisplayTimer();
+    Get.dialog(
+      ConfirmDialog(
+        titleText: "Cancel session",
+        description: "Are you sure you want to discard this session record?",
+        confirmText: "Discard",
+        cancelText: "Back",
+        onConfirm: () {
+          // Stop the session
+          _appCtl.sessionService.stopSession();
+          _stopDisplayTimer();
+          Get.back();
+        },
+        onCancel: () {
+          Get.back();
+        },
+      ),
+    );
   }
 
   @override
@@ -119,20 +133,20 @@ class _SessionPageState extends State<SessionPage> {
                 children: (_appCtl.sessionIsRunning.value)
                     ? [
                         FloatingActionButton.small(
-                          onPressed: _handleStopSession,
+                          onPressed: _onStopSession,
                           heroTag: 'session-stop',
                           child: Icon(Icons.stop),
                         ),
                         SizedBox(width: 15),
                         FloatingActionButton.small(
-                          onPressed: _handleCancelSession,
+                          onPressed: _onCancelSession,
                           heroTag: 'session-cancel',
                           child: Icon(Icons.close),
                         ),
                       ]
                     : [
                         FloatingActionButton.small(
-                          onPressed: _handleStartSession,
+                          onPressed: _onStartSession,
                           heroTag: 'session-start',
                           child: Icon(Icons.play_arrow),
                         ),
