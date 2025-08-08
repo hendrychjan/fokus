@@ -69,6 +69,10 @@ class HistoryPage extends StatelessWidget {
     }
 
     final sessionRecord = sessionRecords[index];
+    final tags = [];
+    for (var tag in sessionRecord.tags) {
+      tags.add(Text(tag.title, style: TextStyle(color: Color(tag.colorARGB))));
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,21 +83,48 @@ class HistoryPage extends StatelessWidget {
               sessionRecord.sessionStart,
             ))) ...[
           Padding(
-            padding: const EdgeInsets.only(left: 16.0),
+            padding: EdgeInsets.only(
+              left: 16.0,
+              top: (index != 0) ? 16.0 : 0.0,
+            ),
             child: Text(
               formatDateDivider(sessionRecord.sessionStart),
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
+          Divider(indent: 16, endIndent: 16),
         ],
         GestureDetector(
           onTap: () => _openEditDialog(sessionRecord),
           child: ListTile(
-            title: Text(
-              AppController.formatDurationAsStopwatch(
-                sessionRecord.sessionEnd.difference(sessionRecord.sessionStart),
-              ),
+            title: Row(
+              children: [
+                Text(
+                  AppController.formatDurationAsStopwatch(
+                    sessionRecord.sessionEnd.difference(
+                      sessionRecord.sessionStart,
+                    ),
+                  ),
+                ),
+              ],
             ),
+            subtitle: (sessionRecord.tags.isNotEmpty)
+                ? Row(
+                    children: sessionRecord.tags
+                        .map(
+                          (t) => Row(
+                            children: [
+                              Text(
+                                t.title,
+                                style: TextStyle(color: Color(t.colorARGB)),
+                              ),
+                              SizedBox(width: 8),
+                            ],
+                          ),
+                        )
+                        .toList(),
+                  )
+                : Text("No tags...", style: TextStyle(color: Colors.grey)),
             trailing: Icon(Icons.arrow_right),
           ),
         ),
