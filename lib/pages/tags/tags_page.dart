@@ -55,7 +55,7 @@ class TagsPage extends StatelessWidget {
     return GestureDetector(
       onTap: () => _openEditDialog(tag),
       child: ListTile(
-        title: Text(tag.title),
+        title: Text(tag.title, style: TextStyle(color: Color(tag.colorARGB))),
         trailing: Icon(Icons.arrow_right),
       ),
     );
