@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class DateTimeFormField extends StatelessWidget {
   final TextEditingController controller;
   final InputDecoration? decoration;
   final String? Function(String?)? validator;
   final void Function(DateTime)? onChange;
+
+  final DateFormat _dateDisplayFormat = DateFormat.yMd().add_jm();
 
   DateTimeFormField({
     super.key,
@@ -13,7 +16,13 @@ class DateTimeFormField extends StatelessWidget {
     this.validator,
     this.onChange,
   }) {
-    _innerFieldController.text = controller.text;
+    // If a valid date time is initially supplied, display it in the inner field
+    DateTime? initialDateTime = DateTime.tryParse(controller.text);
+    if (initialDateTime != null) {
+      _innerFieldController.text = _dateDisplayFormat.format(initialDateTime);
+    } else {
+      _innerFieldController.text = controller.text;
+    }
   }
 
   final TextEditingController _innerFieldController = TextEditingController();
@@ -54,7 +63,7 @@ class DateTimeFormField extends StatelessWidget {
 
     // Save it in the outside controller as well as the inner, display one
     controller.text = selectedDateTime.toIso8601String();
-    _innerFieldController.text = selectedDateTime.toString();
+    _innerFieldController.text = _dateDisplayFormat.format(selectedDateTime);
 
     if (onChange != null) onChange!(selectedDateTime);
   }
