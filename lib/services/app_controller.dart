@@ -1,6 +1,8 @@
+import 'package:fokus/const.dart';
 import 'package:fokus/services/isar_service.dart';
 import 'package:fokus/services/session_service.dart';
 import 'package:fokus/services/storage_service.dart';
+import 'package:fokus/services/settings_service.dart';
 import 'package:get/get.dart';
 
 class AppController extends GetxController {
@@ -16,8 +18,12 @@ class AppController extends GetxController {
   /// Session storage for centralized session control
   SessionService sessionService = SessionService();
 
-  Rx<bool> sessionIsRunning = Rx<bool>(false);
-  Rx<DateTime?> sessionStart = Rx<DateTime?>(null);
+  /// Theme service for centralized theme control
+  SettingsService settingsService = SettingsService();
+
+  // Session control
+  final Rx<bool> sessionIsRunning = Rx<bool>(Const.defaults.sessionIsRunning);
+  final Rx<DateTime?> sessionStart = Rx<DateTime?>(Const.defaults.sessionStart);
 
   /// Format a duration represented a `sec` seconds as a stopwatch resembling string
   static String formatDurationAsStopwatchFromSec(int sec) {

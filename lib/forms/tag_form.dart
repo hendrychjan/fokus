@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fokus/components/form/color_form_field.dart';
 import 'package:fokus/components/form/form_base.dart';
+import 'package:fokus/components/form/spacer_form_field.dart';
 import 'package:fokus/models/tag.dart';
 
 class TagForm extends FormBase<Tag> {
@@ -50,7 +51,7 @@ class TagForm extends FormBase<Tag> {
             return null;
           },
         ),
-        SizedBox(height: 16),
+        SpacerFormField(),
         ColorFormField(
           controller: _colorController,
           decoration: InputDecoration(

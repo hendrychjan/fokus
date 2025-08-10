@@ -1,19 +1,22 @@
+import 'package:fokus/const.dart';
 import 'package:fokus/services/app_controller.dart';
 
 class SessionService {
+  /// Save session related values from AppController to local storage
   void _saveSessionState() async {
     await Future.wait([
       AppController.to.storageService.sessionBox.write(
-        "sessionIsRunning",
+        Const.storageKeys.keySessionIsRunning,
         AppController.to.sessionIsRunning.value.toString(),
       ),
       AppController.to.storageService.sessionBox.write(
-        "sessionStart",
+        Const.storageKeys.keySessionStart,
         AppController.to.sessionStart.value.toString(),
       ),
     ]);
   }
 
+  /// Begin recording a session
   Future<void> startSession() async {
     if (AppController.to.sessionIsRunning.value) {
       throw "Start session event called but session is already running.";
@@ -25,6 +28,7 @@ class SessionService {
     _saveSessionState();
   }
 
+  /// Stop recording a session
   Future<void> stopSession() async {
     if (!AppController.to.sessionIsRunning.value) {
       throw "Stop session event called but a session is not running.";
@@ -42,10 +46,10 @@ class SessionService {
         .to
         .storageService
         .sessionBox
-        .read("sessionIsRunning");
+        .read(Const.storageKeys.keySessionIsRunning);
 
     String? storedValueSessionStart = AppController.to.storageService.sessionBox
-        .read("sessionStart");
+        .read(Const.storageKeys.keySessionStart);
 
     // Restore the session running indicator
     AppController.to.sessionIsRunning.value =

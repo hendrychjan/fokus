@@ -12,6 +12,7 @@ class InitService {
     await Future.wait([_initIsar(), _initStorage()]);
 
     // Attempt to restore previous sessions
+    AppController.to.settingsService.loadAndApplySettings();
     await AppController.to.sessionService.restoreSession();
   }
 
