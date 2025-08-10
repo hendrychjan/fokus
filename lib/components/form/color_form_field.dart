@@ -6,11 +6,13 @@ class ColorFormField extends StatefulWidget {
   final TextEditingController controller;
   final InputDecoration? decoration;
   final String? Function(String?)? validator;
+  final Function(Color)? onChange;
 
   const ColorFormField({
     super.key,
     required this.controller,
     this.decoration,
+    this.onChange,
     this.validator,
   });
 
@@ -62,6 +64,11 @@ class _ColorFormFieldState extends State<ColorFormField> {
             onPressed: () {
               // Save the selected color in the controller
               widget.controller.text = _pickerColor.toHexString();
+
+              // Call the onChange hook if supplied
+              if (widget.onChange != null) {
+                widget.onChange!(_pickerColor);
+              }
 
               // Display the hex string in the inner controller
               _innerFieldController.text = _pickerColor.toHexString(

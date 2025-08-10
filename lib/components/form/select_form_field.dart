@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 class SelectFormField<T> extends FormField<T> {
+  final Function(T?)? onChanged;
+
   SelectFormField({
     super.key,
     required List<T> options,
     required String Function(T) itemTitleBuilder,
     required FormFieldSetter<T> super.onSaved,
     required InputDecoration decoration,
+    this.onChanged,
     super.initialValue,
     AutovalidateMode super.autovalidateMode = AutovalidateMode.disabled,
     String label = 'Select an option',
@@ -21,6 +24,10 @@ class SelectFormField<T> extends FormField<T> {
                  isExpanded: true,
                  onChanged: (T? newValue) {
                    state.didChange(newValue);
+
+                   if (onChanged != null) {
+                     onChanged(newValue);
+                   }
                  },
                  items: options.map((T option) {
                    return DropdownMenuItem<T>(

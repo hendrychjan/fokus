@@ -21,6 +21,6 @@ class InitPage extends StatelessWidget {
     // Run the initialization task in background
     Future.delayed(Duration.zero, _initializeApp);
 
-    return const Center(child: CircularProgressIndicator());
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }

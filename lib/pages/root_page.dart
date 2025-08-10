@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fokus/pages/history/history_page.dart';
 import 'package:fokus/pages/session/session_page.dart';
+import 'package:fokus/pages/settings/settings_page.dart';
 import 'package:fokus/pages/stats/stats_page.dart';
 import 'package:fokus/pages/tags/tags_page.dart';
 
@@ -46,14 +47,20 @@ class _RootPageState extends State<RootPage> {
             icon: Icon(Icons.sell_outlined),
             label: "Tags",
           ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.settings),
+            icon: Icon(Icons.settings_outlined),
+            label: "Settings",
+          ),
         ],
       ),
       body: <Widget>[
         /// Pages
-        const StatsPage(),
+        StatsPage(),
         HistoryPage(),
-        const SessionPage(),
+        SessionPage(),
         TagsPage(),
+        SettingsPage(),
       ][currentPageIndex],
     );
   }
