@@ -6,25 +6,43 @@ import 'package:fokus/components/form/multiselect_form_field.dart';
 import 'package:fokus/models/session_record.dart';
 import 'package:fokus/models/tag.dart';
 
-class SessionRecordForm extends FormBase<SessionRecord> {
+class SessionRecordForm extends StatelessWidget {
+  /// Form configuration
+  final FormConfig<SessionRecord> config;
+
+  SessionRecordForm({super.key, required this.config});
+
+  // Form field controllers
   final TextEditingController _sessionStartController = TextEditingController();
   final TextEditingController _sessionEndController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   final List<Tag> _tagsController = [];
 
-  SessionRecordForm({
-    super.key,
-    required super.formKey,
-    required super.submitText,
-    required super.title,
-    required super.onSubmit,
-    super.initialValue,
-    super.formViewType,
-    super.onDelete,
-  });
+  /// Maps the initialValue to form fields
+  void _mapObjectToForm() {
+    _sessionStartController.text = config.initialValue!.sessionStart
+        .toIso8601String();
+    _sessionEndController.text = config.initialValue!.sessionEnd
+        .toIso8601String();
+    _noteController.text = config.initialValue!.note ?? "";
+    _tagsController.addAll(config.initialValue!.tags);
+  }
 
-  @override
-  Widget buildFormFields(BuildContext context) {
+  /// Maps the form field values to a result object
+  SessionRecord _mapFormToObject(SessionRecord? initial) {
+    SessionRecord sessionRecord = initial ?? SessionRecord();
+
+    sessionRecord.sessionStart = DateTime.parse(_sessionStartController.text);
+    sessionRecord.sessionEnd = DateTime.parse(_sessionEndController.text);
+    sessionRecord.note = _noteController.text;
+    sessionRecord.tags.clear();
+    sessionRecord.tags.addAll(_tagsController);
+
+    return sessionRecord;
+  }
+
+  /// Defines the actual content of the form
+  Widget _buildFormFields() {
     return Column(
       children: [
         DateTimeFormField(
@@ -84,23 +102,12 @@ class SessionRecordForm extends FormBase<SessionRecord> {
   }
 
   @override
-  SessionRecord mapFormToObject(SessionRecord? initial) {
-    SessionRecord sessionRecord = initial ?? SessionRecord();
-
-    sessionRecord.sessionStart = DateTime.parse(_sessionStartController.text);
-    sessionRecord.sessionEnd = DateTime.parse(_sessionEndController.text);
-    sessionRecord.note = _noteController.text;
-    sessionRecord.tags.clear();
-    sessionRecord.tags.addAll(_tagsController);
-
-    return sessionRecord;
-  }
-
-  @override
-  void mapObjectToForm() {
-    _sessionStartController.text = initialValue!.sessionStart.toIso8601String();
-    _sessionEndController.text = initialValue!.sessionEnd.toIso8601String();
-    _noteController.text = initialValue!.note ?? "";
-    _tagsController.addAll(initialValue!.tags);
+  Widget build(BuildContext context) {
+    return FormBase<SessionRecord>(
+      config: config,
+      objectToFormMapper: _mapObjectToForm,
+      formToObjectMapper: _mapFormToObject,
+      formFieldsBuilder: _buildFormFields,
+    );
   }
 }

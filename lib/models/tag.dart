@@ -18,6 +18,9 @@ class Tag {
   /// Dart UI color is then created like so: `Color(tag.colorARGB)`
   late int colorARGB;
 
+  /// Goals for the tag
+  List<TagGoal> goals = [];
+
   /// Save (create or update) this tag
   Future<void> save() async {
     await db.writeTxn(() async {
@@ -55,4 +58,17 @@ class Tag {
 
   @override
   int get hashCode => id.hashCode;
+}
+
+@embedded
+class TagGoal {
+  /// Minutes to satisfy the goal
+  late int targetMinutes;
+
+  /// Weekday numbers the goal applies to
+  /// (weekday numbers in accordance with ISO 8601, meaning 1...7 Mon...Sun)
+  List<int> weekdays = [];
+
+  /// Title of the goal
+  late String title;
 }

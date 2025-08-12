@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fokus/components/confirm_dialog.dart';
+import 'package:fokus/components/form/form_base.dart';
 import 'package:fokus/forms/session_record_form.dart';
 import 'package:fokus/models/session_record.dart';
 import 'package:fokus/services/app_controller.dart';
@@ -58,16 +59,18 @@ class _SessionPageState extends State<SessionPage> {
 
     Get.to(
       () => SessionRecordForm(
-        formKey: _saveSessionRecordFormKey,
-        submitText: "Save",
-        title: "Save session record",
-        initialValue: sessionRecord,
-        onSubmit: (sessionRecord) async {
-          sessionRecord.save();
-          _appCtl.sessionService.stopSession();
-          _stopDisplayTimer();
-          Get.back();
-        },
+        config: FormConfig(
+          formKey: _saveSessionRecordFormKey,
+          submitText: "Save",
+          title: "Save session record",
+          initialValue: sessionRecord,
+          onSubmit: (sessionRecord) async {
+            sessionRecord.save();
+            _appCtl.sessionService.stopSession();
+            _stopDisplayTimer();
+            Get.back();
+          },
+        ),
       ),
     );
   }

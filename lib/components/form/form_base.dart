@@ -4,77 +4,90 @@ import 'package:get/get.dart';
 
 enum FormViewType { fullscreen, dialog }
 
-abstract class FormBase<T> extends StatefulWidget {
+class FormConfig<T> {
   /// Form control field
   final GlobalKey<FormState> formKey;
-
-  /// A flag whether the form is fullscreen (wrapped in scaffold) or in a dialog
-  final FormViewType formViewType;
-
-  /// Text to display on the submit button (usually "create" or "save")
-  final String submitText;
 
   /// Title for the form (usually something like "Create a tag")
   final String title;
 
-  /// Handler function for when the form is submitted
-  final Future<void> Function(T) onSubmit;
+  /// Text to display on the submit button (usually "create" or "save")
+  final String submitText;
+
+  /// A flag whether the form is fullscreen (wrapped in scaffold) or in a dialog
+  final FormViewType viewType;
 
   /// Optional initial value (when updating an existing object)
   final T? initialValue;
+
+  /// Handler function for when the form is submitted
+  final Future<void> Function(T) onSubmit;
 
   /// Handler function for when a delete event is fired and confirmed by user.
   ///
   /// If supplied, the "delete" button in appbar is shown
   final Future<void> Function(T)? onDelete;
 
+  FormConfig({
+    required this.formKey,
+    required this.title,
+    required this.submitText,
+    this.viewType = FormViewType.fullscreen,
+    this.initialValue,
+    required this.onSubmit,
+    this.onDelete,
+  });
+}
+
+class FormBase<T> extends StatefulWidget {
+  /// Form configuration - appearance and actions
+  final FormConfig<T> config;
+
+  /// Map the object to form fields
+  final void Function() objectToFormMapper;
+
+  /// Map the form field values to the object
+  final T Function(T? initial) formToObjectMapper;
+
+  /// A builder for the actual content of the form
+  final Widget Function() formFieldsBuilder;
+
   const FormBase({
     super.key,
-    required this.formKey,
-    required this.submitText,
-    required this.title,
-    required this.onSubmit,
-    this.initialValue,
-    this.onDelete,
-    this.formViewType = FormViewType.fullscreen,
+    required this.config,
+    required this.objectToFormMapper,
+    required this.formToObjectMapper,
+    required this.formFieldsBuilder,
   });
 
   @override
   State<FormBase<T>> createState() => _FormBaseState<T>();
-
-  /// Map the object to form fields
-  void mapObjectToForm();
-
-  /// Map the form field values to the object
-  T mapFormToObject(T? initial);
-
-  Widget buildFormFields(BuildContext context);
 }
 
 class _FormBaseState<T> extends State<FormBase<T>> {
   /// Validate fields and fire the provided submit handler
   void _handleSubmit() async {
-    if (!widget.formKey.currentState!.validate()) return;
+    if (!widget.config.formKey.currentState!.validate()) return;
 
-    widget.formKey.currentState?.save();
+    widget.config.formKey.currentState?.save();
 
     // Update the values
-    T object = widget.mapFormToObject(widget.initialValue);
+    T object = widget.formToObjectMapper(widget.config.initialValue);
 
     // Submit with the new version
-    await widget.onSubmit(object);
+    await widget.config.onSubmit(object);
   }
 
   /// Show a delete confirmation dialog and fire the provided delete handler
   void _handleDelete() {
-    if (widget.initialValue == null) return;
+    if (widget.config.initialValue == null) return;
 
     Get.dialog(
       DeleteDialog<T>(
         titleText: "Delete?",
         contentText: "The item will be permanently deleted.",
-        onDelete: widget.onDelete!,
-        deleteTarget: widget.initialValue as T,
+        onDelete: widget.config.onDelete!,
+        deleteTarget: widget.config.initialValue as T,
       ),
     );
   }
@@ -85,23 +98,25 @@ class _FormBaseState<T> extends State<FormBase<T>> {
 
     /// Use the child provided function for value mapping of provided initial
     /// object to the form fields
-    if (widget.initialValue == null) return;
+    if (widget.config.initialValue == null) return;
 
-    widget.mapObjectToForm();
+    widget.objectToFormMapper();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.formViewType == FormViewType.fullscreen) {
+    if (widget.config.viewType == FormViewType.fullscreen) {
+      // === Fulscreen variant ===
       return Scaffold(
         appBar: AppBar(
-          title: Text(widget.title),
+          title: Text(widget.config.title),
           actions: [
             TextButton(
               onPressed: _handleSubmit,
-              child: Text(widget.submitText),
+              child: Text(widget.config.submitText),
             ),
-            if (widget.initialValue != null && widget.onDelete != null)
+            if (widget.config.initialValue != null &&
+                widget.config.onDelete != null)
               TextButton(
                 onPressed: _handleDelete,
                 child: Text("Delete", style: TextStyle(color: Colors.red)),
@@ -111,13 +126,33 @@ class _FormBaseState<T> extends State<FormBase<T>> {
         body: Padding(
           padding: const EdgeInsets.all(16),
           child: Form(
-            key: widget.formKey,
-            child: widget.buildFormFields(context),
+            key: widget.config.formKey,
+            child: widget.formFieldsBuilder(),
           ),
         ),
       );
     } else {
-      return widget.buildFormFields(context);
+      // === Dialog variant ===
+      return AlertDialog(
+        title: Text(widget.config.title),
+        content: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: widget.config.formKey,
+            child: widget.formFieldsBuilder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: Get.back,
+            child: Text("Cancel", style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: _handleSubmit,
+            child: Text(widget.config.submitText),
+          ),
+        ],
+      );
     }
   }
 }

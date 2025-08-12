@@ -31,13 +31,11 @@ class _ColorFormFieldState extends State<ColorFormField> {
 
     if (widget.controller.text.isNotEmpty) {
       setState(() {
-        _currentColor = Color(int.parse(widget.controller.text));
+        _currentColor = Color(int.parse(widget.controller.text, radix: 16));
         _pickerColor = _currentColor;
       });
 
-      _innerFieldController.text = _pickerColor.toHexString(
-        includeHashSign: true,
-      );
+      _innerFieldController.text = _pickerColor.toARGB32().toRadixString(16);
     }
   }
 
@@ -63,7 +61,9 @@ class _ColorFormFieldState extends State<ColorFormField> {
           TextButton(
             onPressed: () {
               // Save the selected color in the controller
-              widget.controller.text = _pickerColor.toHexString();
+              widget.controller.text = _pickerColor.toARGB32().toRadixString(
+                16,
+              );
 
               // Call the onChange hook if supplied
               if (widget.onChange != null) {
@@ -71,9 +71,9 @@ class _ColorFormFieldState extends State<ColorFormField> {
               }
 
               // Display the hex string in the inner controller
-              _innerFieldController.text = _pickerColor.toHexString(
-                includeHashSign: true,
-              );
+              _innerFieldController.text = _pickerColor
+                  .toARGB32()
+                  .toRadixString(16);
               Get.back();
             },
             child: Text("Select"),
