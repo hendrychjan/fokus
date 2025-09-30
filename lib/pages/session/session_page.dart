@@ -8,6 +8,7 @@ import 'package:fokus/models/session_record.dart';
 import 'package:fokus/models/tag.dart';
 import 'package:fokus/services/app_controller.dart';
 import 'package:get/get.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class SessionPage<T> extends StatefulWidget {
   const SessionPage({super.key});
@@ -37,6 +38,17 @@ class _SessionPageState extends State<SessionPage> {
 
   /// Scheduler for updating goal progress
   late Timer _goalUpdateTimer;
+
+  bool _wakelockEnabled = false;
+
+  /// Switch on/off the display wakelock
+  void _switchWakelock() {
+    WakelockPlus.toggle(enable: !_wakelockEnabled);
+
+    setState(() {
+      _wakelockEnabled = !_wakelockEnabled;
+    });
+  }
 
   /// Stop state update schedulers
   void _startTimers({int initialSeconds = 0}) {
@@ -264,6 +276,14 @@ class _SessionPageState extends State<SessionPage> {
         centerTitle: true,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
+        actions: [
+          IconButton(
+            onPressed: _switchWakelock,
+            icon: Icon(
+              _wakelockEnabled ? Icons.lightbulb : Icons.lightbulb_outline,
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
