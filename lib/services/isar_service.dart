@@ -1,12 +1,14 @@
+import 'package:fokus/const.dart';
 import 'package:fokus/models/app_settings.dart';
 import 'package:fokus/models/session_record.dart';
 import 'package:fokus/models/tag.dart';
+import 'package:fokus/models/tag_goal.dart';
 import 'package:isar/isar.dart';
-import 'package:path_provider/path_provider.dart';
 
 /// **!!!Add active schemas here!!!**
 final List<CollectionSchema> schemas = [
   TagSchema,
+  TagGoalSchema,
   SessionRecordSchema,
   AppSettingsSchema,
 ];
@@ -23,7 +25,7 @@ class IsarService {
     if (_initialized) return;
 
     // Get the directory where Isar data files are stored
-    final dir = await getApplicationDocumentsDirectory();
+    final dir = await Const.defaults.applicationDirectory;
 
     // Open the Isar database
     db = await Isar.open(schemas, directory: dir.path);

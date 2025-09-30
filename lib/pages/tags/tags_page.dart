@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fokus/components/form/form_base.dart';
 import 'package:fokus/forms/tag_form.dart';
 import 'package:fokus/models/tag.dart';
 import 'package:get/get.dart';
@@ -25,10 +26,12 @@ class TagsPage extends StatelessWidget {
   void _openCreateDialog() {
     Get.to(
       () => TagForm(
-        formKey: createTagFormKey,
-        title: "Create a tag",
-        submitText: "Create",
-        onSubmit: _handleSaveTag,
+        config: FormConfig(
+          formKey: createTagFormKey,
+          title: "Create a tag",
+          submitText: "Create",
+          onSubmit: _handleSaveTag,
+        ),
       ),
       fullscreenDialog: true,
     );
@@ -38,13 +41,16 @@ class TagsPage extends StatelessWidget {
   void _openEditDialog(Tag tag) {
     Get.to(
       () => TagForm(
-        formKey: updateTagFormKey,
-        submitText: "Update",
-        title: "Update a tag",
-        initialValue: tag,
-        onSubmit: _handleSaveTag,
-        onDelete: _handleDeleteTag,
+        config: FormConfig(
+          formKey: updateTagFormKey,
+          submitText: "Update",
+          title: "Update a tag",
+          initialValue: tag,
+          onSubmit: _handleSaveTag,
+          onDelete: _handleDeleteTag,
+        ),
       ),
+      fullscreenDialog: true,
     );
   }
 

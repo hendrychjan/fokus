@@ -22,13 +22,8 @@ const TagSchema = CollectionSchema(
       name: r'colorARGB',
       type: IsarType.long,
     ),
-    r'hashCode': PropertySchema(
-      id: 1,
-      name: r'hashCode',
-      type: IsarType.long,
-    ),
     r'title': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'title',
       type: IsarType.string,
     )
@@ -39,7 +34,15 @@ const TagSchema = CollectionSchema(
   deserializeProp: _tagDeserializeProp,
   idName: r'id',
   indexes: {},
-  links: {},
+  links: {
+    r'goals': LinkSchema(
+      id: 282333363964339660,
+      name: r'goals',
+      target: r'TagGoal',
+      single: false,
+      linkName: r'tag',
+    )
+  },
   embeddedSchemas: {},
   getId: _tagGetId,
   getLinks: _tagGetLinks,
@@ -64,8 +67,7 @@ void _tagSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeLong(offsets[0], object.colorARGB);
-  writer.writeLong(offsets[1], object.hashCode);
-  writer.writeString(offsets[2], object.title);
+  writer.writeString(offsets[1], object.title);
 }
 
 Tag _tagDeserialize(
@@ -77,7 +79,7 @@ Tag _tagDeserialize(
   final object = Tag();
   object.colorARGB = reader.readLong(offsets[0]);
   object.id = id;
-  object.title = reader.readString(offsets[2]);
+  object.title = reader.readString(offsets[1]);
   return object;
 }
 
@@ -91,8 +93,6 @@ P _tagDeserializeProp<P>(
     case 0:
       return (reader.readLong(offset)) as P;
     case 1:
-      return (reader.readLong(offset)) as P;
-    case 2:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -104,11 +104,12 @@ Id _tagGetId(Tag object) {
 }
 
 List<IsarLinkBase<dynamic>> _tagGetLinks(Tag object) {
-  return [];
+  return [object.goals];
 }
 
 void _tagAttach(IsarCollection<dynamic> col, Id id, Tag object) {
   object.id = id;
+  object.goals.attach(col, col.isar.collection<TagGoal>(), r'goals', id);
 }
 
 extension TagQueryWhereSort on QueryBuilder<Tag, Tag, QWhere> {
@@ -231,58 +232,6 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'colorARGB',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Tag, Tag, QAfterFilterCondition> hashCodeEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Tag, Tag, QAfterFilterCondition> hashCodeGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Tag, Tag, QAfterFilterCondition> hashCodeLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Tag, Tag, QAfterFilterCondition> hashCodeBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'hashCode',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -474,7 +423,61 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
 
 extension TagQueryObject on QueryBuilder<Tag, Tag, QFilterCondition> {}
 
-extension TagQueryLinks on QueryBuilder<Tag, Tag, QFilterCondition> {}
+extension TagQueryLinks on QueryBuilder<Tag, Tag, QFilterCondition> {
+  QueryBuilder<Tag, Tag, QAfterFilterCondition> goals(FilterQuery<TagGoal> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r'goals');
+    });
+  }
+
+  QueryBuilder<Tag, Tag, QAfterFilterCondition> goalsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'goals', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<Tag, Tag, QAfterFilterCondition> goalsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'goals', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<Tag, Tag, QAfterFilterCondition> goalsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'goals', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<Tag, Tag, QAfterFilterCondition> goalsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'goals', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<Tag, Tag, QAfterFilterCondition> goalsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'goals', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<Tag, Tag, QAfterFilterCondition> goalsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(
+          r'goals', lower, includeLower, upper, includeUpper);
+    });
+  }
+}
 
 extension TagQuerySortBy on QueryBuilder<Tag, Tag, QSortBy> {
   QueryBuilder<Tag, Tag, QAfterSortBy> sortByColorARGB() {
@@ -486,18 +489,6 @@ extension TagQuerySortBy on QueryBuilder<Tag, Tag, QSortBy> {
   QueryBuilder<Tag, Tag, QAfterSortBy> sortByColorARGBDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'colorARGB', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Tag, Tag, QAfterSortBy> sortByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Tag, Tag, QAfterSortBy> sortByHashCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.desc);
     });
   }
 
@@ -524,18 +515,6 @@ extension TagQuerySortThenBy on QueryBuilder<Tag, Tag, QSortThenBy> {
   QueryBuilder<Tag, Tag, QAfterSortBy> thenByColorARGBDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'colorARGB', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Tag, Tag, QAfterSortBy> thenByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Tag, Tag, QAfterSortBy> thenByHashCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.desc);
     });
   }
 
@@ -571,12 +550,6 @@ extension TagQueryWhereDistinct on QueryBuilder<Tag, Tag, QDistinct> {
     });
   }
 
-  QueryBuilder<Tag, Tag, QDistinct> distinctByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'hashCode');
-    });
-  }
-
   QueryBuilder<Tag, Tag, QDistinct> distinctByTitle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -595,12 +568,6 @@ extension TagQueryProperty on QueryBuilder<Tag, Tag, QQueryProperty> {
   QueryBuilder<Tag, int, QQueryOperations> colorARGBProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'colorARGB');
-    });
-  }
-
-  QueryBuilder<Tag, int, QQueryOperations> hashCodeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'hashCode');
     });
   }
 

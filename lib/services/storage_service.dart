@@ -16,7 +16,10 @@ class StorageService {
     await Future.wait([GetStorage.init(Const.storageKeys.boxSession)]);
 
     // Bind all boxes
-    sessionBox = GetStorage(Const.storageKeys.boxSession);
+    sessionBox = GetStorage(
+      Const.storageKeys.boxSession,
+      (await Const.defaults.applicationDirectory).path,
+    );
 
     _initialized = true;
   }

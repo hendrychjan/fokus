@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fokus/components/confirm_dialog.dart';
+import 'package:fokus/components/form/form_base.dart';
+import 'package:fokus/const.dart';
 import 'package:fokus/forms/session_record_form.dart';
 import 'package:fokus/models/session_record.dart';
+import 'package:fokus/models/tag.dart';
 import 'package:fokus/services/app_controller.dart';
 import 'package:get/get.dart';
 
@@ -15,40 +18,75 @@ class SessionPage<T> extends StatefulWidget {
 
 class _SessionPageState extends State<SessionPage> {
   final GlobalKey<FormState> _saveSessionRecordFormKey = GlobalKey<FormState>();
-  final _appCtl = AppController.to;
+
+  /// A short link to the app controller
+  AppController get _appCtl => AppController.to;
+
+  /// Number of seconds passed during an active session
   int _seconds = 0;
+
+  /// A source for the lamp image - changes dynamically based on session state
+  String _lampImage = Const.assetMapping.lampOff;
+
+  /// List of active tags (their goals will be updated as time on the timer
+  /// increases)
+  final Map<Tag, bool> _activeTags = {};
+
+  /// Scheduler for updating the timer display
   late Timer _sessionTimer;
 
-  void _startDisplayTimer({int initialSeconds = 0}) {
+  /// Scheduler for updating goal progress
+  late Timer _goalUpdateTimer;
+
+  /// Stop state update schedulers
+  void _startTimers({int initialSeconds = 0}) {
     setState(() {
       _seconds = initialSeconds;
     });
+
+    // Schedule the session display timer
     _sessionTimer = Timer.periodic(
       const Duration(seconds: 1),
       (t) => setState(() {
         _seconds++;
       }),
     );
+
+    // Schedule the goal progress update timer
+    _goalUpdateTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (t) => _updateTagGoalProgress(),
+    );
   }
 
-  void _stopDisplayTimer() {
+  /// Stop state update schedulers
+  void _stopTimers() {
     setState(() {
       _seconds = 0;
     });
+
     _sessionTimer.cancel();
+    _goalUpdateTimer.cancel();
   }
 
-  Future<void> _onStartSession() async {
+  /// Event handler for the "start" button for session
+  Future<void> _handleStartSession() async {
     if (_appCtl.sessionIsRunning.value) return;
 
     // Start the session
     _appCtl.sessionService.startSession();
 
-    // Create the timer display updating event
-    _startDisplayTimer();
+    // Set the lamp mode to "on"
+    setState(() {
+      _lampImage = Const.assetMapping.lampOn;
+    });
+
+    // Start update timers
+    _startTimers();
   }
 
-  void _onStopSession() {
+  /// Event handler for the "stop" button for session
+  void _handleStopSession() {
     if (!_appCtl.sessionIsRunning.value) return;
 
     SessionRecord sessionRecord = SessionRecord();
@@ -58,21 +96,30 @@ class _SessionPageState extends State<SessionPage> {
 
     Get.to(
       () => SessionRecordForm(
-        formKey: _saveSessionRecordFormKey,
-        submitText: "Save",
-        title: "Save session record",
-        initialValue: sessionRecord,
-        onSubmit: (sessionRecord) async {
-          sessionRecord.save();
-          _appCtl.sessionService.stopSession();
-          _stopDisplayTimer();
-          Get.back();
-        },
+        config: FormConfig(
+          formKey: _saveSessionRecordFormKey,
+          submitText: "Save",
+          title: "Save session record",
+          initialValue: sessionRecord,
+          onSubmit: (sessionRecord) async {
+            sessionRecord.save();
+            _appCtl.sessionService.stopSession();
+            _stopTimers();
+
+            // Set the lamp mode to "on"
+            setState(() {
+              _lampImage = Const.assetMapping.lampOff;
+            });
+
+            Get.back();
+          },
+        ),
       ),
     );
   }
 
-  void _onCancelSession() {
+  /// Event handler for the "cancel" button for session
+  void _handleCancelSession() {
     if (!_appCtl.sessionIsRunning.value) return;
 
     Get.dialog(
@@ -84,13 +131,106 @@ class _SessionPageState extends State<SessionPage> {
         onConfirm: () {
           // Stop the session
           _appCtl.sessionService.stopSession();
-          _stopDisplayTimer();
+          _stopTimers();
+
+          // Set the lamp mode to "on"
+          setState(() {
+            _lampImage = Const.assetMapping.lampOff;
+          });
+
           Get.back();
         },
         onCancel: () {
           Get.back();
         },
       ),
+    );
+  }
+
+  /// Updates progress values of progress indicators of goals
+  Future<void> _updateTagGoalProgress() async {
+    // TODO: Implement update goal hook
+    // double currentSessionMinutes = _seconds / 60;
+
+    // // Compute progress values for each goal on the session page
+    // for (var goalProgress in _goals) {
+    //   // Check if the goal's tag is active
+    //   if (_activeTags[goalProgress.tag]!) {
+    //     // If active, the current session value is added to it's progress
+    //     setState(() {
+    //       goalProgress.progress =
+    //           (goalProgress.minutesBeforeCurrentSession +
+    //               currentSessionMinutes) /
+    //           goalProgress.goal.targetMinutes;
+    //     });
+    //   } else {
+    //     // If not active, the progress is the one computed without the current
+    //     // session
+    //     setState(() {
+    //       goalProgress.progress =
+    //           goalProgress.minutesBeforeCurrentSession /
+    //           goalProgress.goal.targetMinutes;
+    //     });
+    //   }
+    // }
+  }
+
+  Widget _buildLampSection() {
+    return FractionallySizedBox(
+      widthFactor: 0.8,
+      child: Image.asset(_lampImage, fit: BoxFit.contain),
+    );
+  }
+
+  Widget _buildProgressSection() {
+    return Column(
+      children: [
+        FractionallySizedBox(
+          widthFactor: 0.5,
+          child: LinearProgressIndicator(value: 2 / 5),
+        ),
+        Text("2/5 goals completed today"),
+      ],
+    );
+  }
+
+  Widget _buildTimerSection() {
+    return Column(
+      children: [
+        Text(
+          AppController.formatDurationAsStopwatchFromSec(_seconds),
+          style: TextStyle(fontSize: 50),
+        ),
+        Obx(
+          () => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: (_appCtl.sessionIsRunning.value)
+                ? [
+                    FloatingActionButton.small(
+                      key: UniqueKey(),
+                      onPressed: _handleStopSession,
+                      heroTag: 'session-stop',
+                      child: Icon(Icons.stop),
+                    ),
+                    SizedBox(width: 16),
+                    FloatingActionButton.small(
+                      key: UniqueKey(),
+                      onPressed: _handleCancelSession,
+                      heroTag: 'session-cancel',
+                      child: Icon(Icons.close),
+                    ),
+                  ]
+                : [
+                    FloatingActionButton.small(
+                      key: UniqueKey(),
+                      onPressed: _handleStartSession,
+                      heroTag: 'session-start',
+                      child: Icon(Icons.play_arrow),
+                    ),
+                  ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -102,7 +242,10 @@ class _SessionPageState extends State<SessionPage> {
       _appCtl.sessionStart.value!,
     );
 
-    _startDisplayTimer(initialSeconds: durationRestored.inSeconds);
+    // Set the lamp mode to "on"
+    _lampImage = Const.assetMapping.lampOn;
+
+    _startTimers(initialSeconds: durationRestored.inSeconds);
 
     super.initState();
   }
@@ -116,43 +259,21 @@ class _SessionPageState extends State<SessionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Session"), centerTitle: true),
+      appBar: AppBar(
+        title: Text("Session"),
+        centerTitle: true,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+      ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              AppController.formatDurationAsStopwatchFromSec(_seconds),
-              style: TextStyle(fontSize: 40),
-            ),
-            SizedBox(height: 15),
-            Obx(
-              () => Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: (_appCtl.sessionIsRunning.value)
-                    ? [
-                        FloatingActionButton.small(
-                          onPressed: _onStopSession,
-                          heroTag: 'session-stop',
-                          child: Icon(Icons.stop),
-                        ),
-                        SizedBox(width: 15),
-                        FloatingActionButton.small(
-                          onPressed: _onCancelSession,
-                          heroTag: 'session-cancel',
-                          child: Icon(Icons.close),
-                        ),
-                      ]
-                    : [
-                        FloatingActionButton.small(
-                          onPressed: _onStartSession,
-                          heroTag: 'session-start',
-                          child: Icon(Icons.play_arrow),
-                        ),
-                      ],
-              ),
-            ),
+            _buildLampSection(),
+            _buildTimerSection(),
+            // _buildProgressSection(),
           ],
         ),
       ),

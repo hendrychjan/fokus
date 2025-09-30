@@ -33,3 +33,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/table-lamp-on.png
+    - assets/table-lamp-off.png
+    - assets/icon/icon.png
