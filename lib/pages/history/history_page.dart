@@ -146,7 +146,7 @@ class HistoryPage extends StatelessWidget {
         child: Icon(Icons.add),
       ),
       body: StreamBuilder<List<SessionRecord>>(
-        stream: SessionRecord.getAllStream().map(
+        stream: SessionRecord.getAllByDateStream().map(
           (list) => list.reversed.toList(),
         ),
         builder: (context, snapshot) {

@@ -47,8 +47,11 @@ class SessionRecord {
     return await db.sessionRecords.where().findAll();
   }
 
-  /// Get all session records in a stream, constantly updated
-  static Stream<List<SessionRecord>> getAllStream() async* {
-    yield* db.sessionRecords.where().watch(fireImmediately: true);
+  /// Get all session records in a stream, constantly updated, sorted from the
+  /// most recently finished
+  static Stream<List<SessionRecord>> getAllByDateStream() async* {
+    yield* db.sessionRecords.where().sortBySessionEnd().watch(
+      fireImmediately: true,
+    );
   }
 }
