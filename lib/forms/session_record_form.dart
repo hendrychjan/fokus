@@ -19,7 +19,7 @@ class SessionRecordForm extends StatelessWidget {
   final List<Tag> _tagsController = [];
 
   /// Maps the initialValue to form fields
-  void _mapObjectToForm() {
+  Future<void> _mapObjectToForm() async {
     _sessionStartController.text = config.initialValue!.sessionStart
         .toIso8601String();
     _sessionEndController.text = config.initialValue!.sessionEnd

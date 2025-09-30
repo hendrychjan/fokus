@@ -7,6 +7,7 @@ import 'package:fokus/components/form/spacer_form_field.dart';
 import 'package:fokus/const.dart';
 import 'package:fokus/forms/tag_goal_form.dart';
 import 'package:fokus/models/tag.dart';
+import 'package:fokus/models/tag_goal.dart';
 import 'package:get/get.dart';
 
 class TagForm extends StatefulWidget {
@@ -93,6 +94,7 @@ class _TagFormState extends State<TagForm> {
     List<Widget> goals = [];
 
     for (var goal in _goalsController) {
+      goal.weekdays.sort((a, b) => a.compareTo(b));
       goals.add(
         Card.outlined(
           key: UniqueKey(),
@@ -130,11 +132,14 @@ class _TagFormState extends State<TagForm> {
   }
 
   /// Map the initial value to form fields
-  void _mapObjectToForm() {
+  Future<void> _mapObjectToForm() async {
+    await widget.config.initialValue!.load();
+
     _titleController.text = widget.config.initialValue!.title;
     _colorController.text = widget.config.initialValue!.colorARGB.toRadixString(
       16,
     );
+
     _goalsController.clear();
     _goalsController.addAll(widget.config.initialValue!.goals);
   }
@@ -146,7 +151,7 @@ class _TagFormState extends State<TagForm> {
     tag.title = _titleController.text;
     tag.colorARGB = int.parse(_colorController.text, radix: 16);
 
-    tag.goals = _goalsController;
+    tag.tempGoalsUpdate = _goalsController;
 
     return tag;
   }

@@ -2,11 +2,13 @@ import 'package:fokus/const.dart';
 import 'package:fokus/models/app_settings.dart';
 import 'package:fokus/models/session_record.dart';
 import 'package:fokus/models/tag.dart';
+import 'package:fokus/models/tag_goal.dart';
 import 'package:isar/isar.dart';
 
 /// **!!!Add active schemas here!!!**
 final List<CollectionSchema> schemas = [
   TagSchema,
+  TagGoalSchema,
   SessionRecordSchema,
   AppSettingsSchema,
 ];

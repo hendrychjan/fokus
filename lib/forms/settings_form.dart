@@ -51,7 +51,7 @@ class _SettingsFormState extends State<SettingsForm> {
         .settingsService
         .appSettings
         .themeSeedColorARGB
-        .toString();
+        .toRadixString(16);
 
     super.initState();
   }

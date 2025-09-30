@@ -9,6 +9,15 @@ class Const {
 
   static const storageKeys = _StorageKeys();
   static const defaults = _Defaults();
+  static const assetMapping = _AssetMapping();
+}
+
+class _AssetMapping {
+  const _AssetMapping();
+
+  // Lamp image
+  final String lampOn = "assets/table-lamp-on.png";
+  final String lampOff = "assets/table-lamp-off.png";
 }
 
 class _StorageKeys {

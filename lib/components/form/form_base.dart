@@ -44,7 +44,7 @@ class FormBase<T> extends StatefulWidget {
   final FormConfig<T> config;
 
   /// Map the object to form fields
-  final void Function() objectToFormMapper;
+  final Future<void> Function() objectToFormMapper;
 
   /// Map the form field values to the object
   final T Function(T? initial) formToObjectMapper;
@@ -65,9 +65,27 @@ class FormBase<T> extends StatefulWidget {
 }
 
 class _FormBaseState<T> extends State<FormBase<T>> {
+  bool loading = false;
+
+  /// Sugar for setting the state for loading to true
+  void startLoading() {
+    setState(() {
+      loading = true;
+    });
+  }
+
+  /// Sugar for setting the state for loading to false
+  void stopLoading() {
+    setState(() {
+      loading = false;
+    });
+  }
+
   /// Validate fields and fire the provided submit handler
   void _handleSubmit() async {
     if (!widget.config.formKey.currentState!.validate()) return;
+
+    startLoading();
 
     widget.config.formKey.currentState?.save();
 
@@ -76,6 +94,8 @@ class _FormBaseState<T> extends State<FormBase<T>> {
 
     // Submit with the new version
     await widget.config.onSubmit(object);
+
+    stopLoading();
   }
 
   /// Show a delete confirmation dialog and fire the provided delete handler
@@ -100,7 +120,9 @@ class _FormBaseState<T> extends State<FormBase<T>> {
     /// object to the form fields
     if (widget.config.initialValue == null) return;
 
-    widget.objectToFormMapper();
+    startLoading();
+
+    widget.objectToFormMapper().then((v) => stopLoading());
   }
 
   @override
@@ -123,25 +145,29 @@ class _FormBaseState<T> extends State<FormBase<T>> {
               ),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: widget.config.formKey,
-            child: widget.formFieldsBuilder(),
-          ),
-        ),
+        body: (!loading)
+            ? Padding(
+                padding: const EdgeInsets.all(16),
+                child: Form(
+                  key: widget.config.formKey,
+                  child: widget.formFieldsBuilder(),
+                ),
+              )
+            : Center(child: CircularProgressIndicator()),
       );
     } else {
       // === Dialog variant ===
       return AlertDialog(
         title: Text(widget.config.title),
-        content: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: widget.config.formKey,
-            child: widget.formFieldsBuilder(),
-          ),
-        ),
+        content: (!loading)
+            ? Padding(
+                padding: const EdgeInsets.all(16),
+                child: Form(
+                  key: widget.config.formKey,
+                  child: widget.formFieldsBuilder(),
+                ),
+              )
+            : Center(child: CircularProgressIndicator()),
         actions: [
           TextButton(
             onPressed: Get.back,

@@ -2,8 +2,8 @@ import 'package:fokus/components/form/form_base.dart';
 import 'package:fokus/components/form/multiselect_form_field.dart';
 import 'package:fokus/components/form/spacer_form_field.dart';
 import 'package:fokus/const.dart';
-import 'package:fokus/models/tag.dart';
 import 'package:flutter/material.dart';
+import 'package:fokus/models/tag_goal.dart';
 
 class TagGoalForm extends StatelessWidget {
   /// Form configuration
@@ -18,7 +18,7 @@ class TagGoalForm extends StatelessWidget {
   final List<int> _weekdaysController = [];
 
   /// Maps the initialValue to form fields
-  void _mapObjectToForm() {
+  Future<void> _mapObjectToForm() async {
     _titleController.text = config.initialValue!.title;
     _targetMinutesController.text = config.initialValue!.targetMinutes
         .toString();
