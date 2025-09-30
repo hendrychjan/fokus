@@ -15,6 +15,7 @@ void main() {
         brightness: PlatformDispatcher.instance.platformBrightness,
         useMaterial3: true,
       ),
+      debugShowCheckedModeBanner: false,
       // darkTheme: ThemeData(
       //   colorSchemeSeed: Const.defaults.themeSeedColor,
       //   brightness: Brightness.dark,
