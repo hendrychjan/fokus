@@ -21,13 +21,19 @@ class AppSettings {
   /// Dart UI color is then created like so: `Color(appSettings.colorARGB)`
   late int themeSeedColorARGB;
 
+  /// Wakelock on session page enabled
+  late bool wakelockEnabled;
+
+  AppSettings({this.wakelockEnabled = true});
+
   /// Create a default settings preset and save it
-  static AppSettings _createDefault() {
+  static AppSettings _createDefaultSettings() {
     AppSettings defaultSettings = AppSettings();
 
     defaultSettings.themeMode = Const.defaults.themeMode;
     defaultSettings.themeSeedColorARGB = Const.defaults.themeSeedColor
         .toARGB32();
+    defaultSettings.wakelockEnabled = Const.defaults.wakelockEnabled;
 
     // Intentionally not awaited
     defaultSettings.save();
@@ -48,7 +54,7 @@ class AppSettings {
     // Currently only single user is supported, so there should by just one
     // instance of settings (with id 0)
     AppSettings settings =
-        await db.appSettings.where().findFirst() ?? _createDefault();
+        await db.appSettings.where().findFirst() ?? _createDefaultSettings();
 
     return settings;
   }

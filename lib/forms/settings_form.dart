@@ -12,16 +12,35 @@ class SettingsForm extends StatefulWidget {
 }
 
 class _SettingsFormState extends State<SettingsForm> {
-  final List<_ThemeTypeOption> _themeTypeOptions = [
-    _ThemeTypeOption("System", ThemeMode.system),
-    _ThemeTypeOption("Light", ThemeMode.light),
-    _ThemeTypeOption("Dark", ThemeMode.dark),
+  final List<_SelectOption<ThemeMode>> _themeTypeOptions = [
+    _SelectOption("System", ThemeMode.system),
+    _SelectOption("Light", ThemeMode.light),
+    _SelectOption("Dark", ThemeMode.dark),
+  ];
+
+  final List<_SelectOption<bool>> _wakelockModeOptions = [
+    _SelectOption("Enabled during active session", true),
+    _SelectOption("Always disabled", false),
   ];
 
   late ThemeMode _themeModeController;
   final TextEditingController _themeColorController = TextEditingController();
+  late bool _wakelockModeController;
 
-  void _handleChangeTheme(_ThemeTypeOption? modeOpt) {
+  void _handleChangeWakelockMode(_SelectOption<bool>? modeOpt) {
+    if (modeOpt == null) return;
+
+    // Save wakelock mode settings
+    AppController.to.settingsService.appSettings.wakelockEnabled =
+        modeOpt.value;
+    AppController.to.settingsService.appSettings.save();
+
+    setState(() {
+      _wakelockModeController = modeOpt.value;
+    });
+  }
+
+  void _handleChangeTheme(_SelectOption<ThemeMode>? modeOpt) {
     if (modeOpt == null) return;
 
     // Save and apply theme mode
@@ -52,6 +71,8 @@ class _SettingsFormState extends State<SettingsForm> {
         .appSettings
         .themeSeedColorARGB
         .toRadixString(16);
+    _wakelockModeController =
+        AppController.to.settingsService.appSettings.wakelockEnabled;
 
     super.initState();
   }
@@ -63,10 +84,11 @@ class _SettingsFormState extends State<SettingsForm> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            SelectFormField<_ThemeTypeOption>(
+            // Theme mode select
+            SelectFormField<_SelectOption<ThemeMode>>(
               options: _themeTypeOptions,
-              itemTitleBuilder: (_ThemeTypeOption opt) => opt.label,
-              onSaved: (_ThemeTypeOption? sel) {
+              itemTitleBuilder: (_SelectOption opt) => opt.label,
+              onSaved: (_SelectOption? sel) {
                 if (sel == null) return;
 
                 setState(() {
@@ -80,10 +102,12 @@ class _SettingsFormState extends State<SettingsForm> {
                 border: OutlineInputBorder(),
               ),
               initialValue: _themeTypeOptions.firstWhere(
-                (_ThemeTypeOption opt) => opt.value == _themeModeController,
+                (_SelectOption opt) => opt.value == _themeModeController,
               ),
             ),
             SpacerFormField(),
+
+            // Theme color select
             ColorFormField(
               controller: _themeColorController,
               decoration: InputDecoration(
@@ -93,6 +117,29 @@ class _SettingsFormState extends State<SettingsForm> {
               ),
               onChange: _handleChangeColor,
             ),
+            SpacerFormField(),
+
+            // Wakelock mode select
+            SelectFormField<_SelectOption<bool>>(
+              options: _wakelockModeOptions,
+              itemTitleBuilder: (_SelectOption opt) => opt.label,
+              onSaved: (_SelectOption? sel) {
+                if (sel == null) return;
+
+                setState(() {
+                  _themeModeController = sel.value;
+                });
+              },
+              onChanged: _handleChangeWakelockMode,
+              decoration: InputDecoration(
+                labelText: "Wakelock",
+                prefixIcon: Icon(Icons.display_settings),
+                border: OutlineInputBorder(),
+              ),
+              initialValue: _wakelockModeOptions.firstWhere(
+                (_SelectOption opt) => opt.value == _wakelockModeController,
+              ),
+            ),
           ],
         ),
       ),
@@ -100,9 +147,9 @@ class _SettingsFormState extends State<SettingsForm> {
   }
 }
 
-class _ThemeTypeOption {
+class _SelectOption<T> {
   String label;
-  ThemeMode value;
+  T value;
 
-  _ThemeTypeOption(this.label, this.value);
+  _SelectOption(this.label, this.value);
 }
