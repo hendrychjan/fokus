@@ -27,6 +27,11 @@ const AppSettingsSchema = CollectionSchema(
       id: 1,
       name: r'themeSeedColorARGB',
       type: IsarType.long,
+    ),
+    r'wakelockEnabled': PropertySchema(
+      id: 2,
+      name: r'wakelockEnabled',
+      type: IsarType.bool,
     )
   },
   estimateSize: _appSettingsEstimateSize,
@@ -60,6 +65,7 @@ void _appSettingsSerialize(
 ) {
   writer.writeByte(offsets[0], object.themeMode.index);
   writer.writeLong(offsets[1], object.themeSeedColorARGB);
+  writer.writeBool(offsets[2], object.wakelockEnabled);
 }
 
 AppSettings _appSettingsDeserialize(
@@ -68,7 +74,9 @@ AppSettings _appSettingsDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = AppSettings();
+  final object = AppSettings(
+    wakelockEnabled: reader.readBoolOrNull(offsets[2]) ?? true,
+  );
   object.id = id;
   object.themeMode =
       _AppSettingsthemeModeValueEnumMap[reader.readByteOrNull(offsets[0])] ??
@@ -90,6 +98,8 @@ P _appSettingsDeserializeProp<P>(
           ThemeMode.system) as P;
     case 1:
       return (reader.readLong(offset)) as P;
+    case 2:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -363,6 +373,16 @@ extension AppSettingsQueryFilter
       ));
     });
   }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      wakelockEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'wakelockEnabled',
+        value: value,
+      ));
+    });
+  }
 }
 
 extension AppSettingsQueryObject
@@ -396,6 +416,19 @@ extension AppSettingsQuerySortBy
       sortByThemeSeedColorARGBDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'themeSeedColorARGB', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> sortByWakelockEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wakelockEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
+      sortByWakelockEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wakelockEnabled', Sort.desc);
     });
   }
 }
@@ -439,6 +472,19 @@ extension AppSettingsQuerySortThenBy
       return query.addSortBy(r'themeSeedColorARGB', Sort.desc);
     });
   }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> thenByWakelockEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wakelockEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
+      thenByWakelockEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wakelockEnabled', Sort.desc);
+    });
+  }
 }
 
 extension AppSettingsQueryWhereDistinct
@@ -453,6 +499,13 @@ extension AppSettingsQueryWhereDistinct
       distinctByThemeSeedColorARGB() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'themeSeedColorARGB');
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QDistinct>
+      distinctByWakelockEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'wakelockEnabled');
     });
   }
 }
@@ -475,6 +528,12 @@ extension AppSettingsQueryProperty
       themeSeedColorARGBProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'themeSeedColorARGB');
+    });
+  }
+
+  QueryBuilder<AppSettings, bool, QQueryOperations> wakelockEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'wakelockEnabled');
     });
   }
 }

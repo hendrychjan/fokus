@@ -37,6 +37,7 @@ class _Defaults {
   // Session related
   final bool sessionIsRunning = false;
   final DateTime? sessionStart = null;
+  final bool wakelockEnabled = true;
 
   // Theme related
   final Color themeSeedColor = Colors.blue;

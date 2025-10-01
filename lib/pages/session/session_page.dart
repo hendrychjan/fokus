@@ -5,7 +5,6 @@ import 'package:fokus/components/form/form_base.dart';
 import 'package:fokus/const.dart';
 import 'package:fokus/forms/session_record_form.dart';
 import 'package:fokus/models/session_record.dart';
-import 'package:fokus/models/tag.dart';
 import 'package:fokus/services/app_controller.dart';
 import 'package:get/get.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -29,26 +28,11 @@ class _SessionPageState extends State<SessionPage> {
   /// A source for the lamp image - changes dynamically based on session state
   String _lampImage = Const.assetMapping.lampOff;
 
-  /// List of active tags (their goals will be updated as time on the timer
-  /// increases)
-  final Map<Tag, bool> _activeTags = {};
-
   /// Scheduler for updating the timer display
   late Timer _sessionTimer;
 
   /// Scheduler for updating goal progress
   late Timer _goalUpdateTimer;
-
-  bool _wakelockEnabled = false;
-
-  /// Switch on/off the display wakelock
-  void _switchWakelock() {
-    WakelockPlus.toggle(enable: !_wakelockEnabled);
-
-    setState(() {
-      _wakelockEnabled = !_wakelockEnabled;
-    });
-  }
 
   /// Stop state update schedulers
   void _startTimers({int initialSeconds = 0}) {
@@ -95,6 +79,11 @@ class _SessionPageState extends State<SessionPage> {
 
     // Start update timers
     _startTimers();
+
+    // Enable wakelock if enabled in settings
+    if (AppController.to.settingsService.appSettings.wakelockEnabled) {
+      WakelockPlus.enable();
+    }
   }
 
   /// Event handler for the "stop" button for session
@@ -123,6 +112,9 @@ class _SessionPageState extends State<SessionPage> {
               _lampImage = Const.assetMapping.lampOff;
             });
 
+            // Disable wakelock because session is no longer active
+            WakelockPlus.disable();
+
             Get.back();
           },
         ),
@@ -145,10 +137,13 @@ class _SessionPageState extends State<SessionPage> {
           _appCtl.sessionService.stopSession();
           _stopTimers();
 
-          // Set the lamp mode to "on"
+          // Set the lamp mode to "off"
           setState(() {
             _lampImage = Const.assetMapping.lampOff;
           });
+
+          // Disable wakelock because session is no longer active
+          WakelockPlus.disable();
 
           Get.back();
         },
@@ -265,6 +260,10 @@ class _SessionPageState extends State<SessionPage> {
   @override
   void dispose() {
     if (AppController.to.sessionIsRunning.value) _sessionTimer.cancel();
+
+    // Always disable wakeclock when leaving session page
+    WakelockPlus.disable();
+
     super.dispose();
   }
 
@@ -276,14 +275,6 @@ class _SessionPageState extends State<SessionPage> {
         centerTitle: true,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
-        actions: [
-          IconButton(
-            onPressed: _switchWakelock,
-            icon: Icon(
-              _wakelockEnabled ? Icons.lightbulb : Icons.lightbulb_outline,
-            ),
-          ),
-        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
