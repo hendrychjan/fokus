@@ -86,6 +86,8 @@ class _ColorFormFieldState extends State<ColorFormField> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      readOnly: true,
+      canRequestFocus: false,
       controller: _innerFieldController,
       decoration: widget.decoration,
       validator: widget.validator,

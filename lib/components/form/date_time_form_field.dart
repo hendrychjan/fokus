@@ -71,6 +71,8 @@ class DateTimeFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      readOnly: true,
+      canRequestFocus: false,
       controller: _innerFieldController,
       decoration: decoration,
       validator: validator,
