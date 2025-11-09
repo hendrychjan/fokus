@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fokus/components/confirm_dialog.dart';
 import 'package:fokus/components/form/form_base.dart';
+import 'package:fokus/components/info_dialog.dart';
 import 'package:fokus/const.dart';
 import 'package:fokus/forms/session_record_form.dart';
 import 'package:fokus/models/session_record.dart';
@@ -33,6 +34,18 @@ class _SessionPageState extends State<SessionPage> {
 
   /// Scheduler for updating goal progress
   late Timer _goalUpdateTimer;
+
+  bool _wakelockIsActive = false;
+
+  /// Enable wakelock if allowed in settings
+  void _setupWakelock() {
+    if (AppController.to.settingsService.appSettings.wakelockEnabled) {
+      WakelockPlus.enable();
+      setState(() {
+        _wakelockIsActive = true;
+      });
+    }
+  }
 
   /// Stop state update schedulers
   void _startTimers({int initialSeconds = 0}) {
@@ -81,9 +94,7 @@ class _SessionPageState extends State<SessionPage> {
     _startTimers();
 
     // Enable wakelock if enabled in settings
-    if (AppController.to.settingsService.appSettings.wakelockEnabled) {
-      WakelockPlus.enable();
-    }
+    _setupWakelock();
   }
 
   /// Event handler for the "stop" button for session
@@ -114,6 +125,9 @@ class _SessionPageState extends State<SessionPage> {
 
             // Disable wakelock because session is no longer active
             WakelockPlus.disable();
+            setState(() {
+              _wakelockIsActive = false;
+            });
 
             Get.back();
           },
@@ -144,6 +158,9 @@ class _SessionPageState extends State<SessionPage> {
 
           // Disable wakelock because session is no longer active
           WakelockPlus.disable();
+          setState(() {
+            _wakelockIsActive = false;
+          });
 
           Get.back();
         },
@@ -180,6 +197,22 @@ class _SessionPageState extends State<SessionPage> {
     //     });
     //   }
     // }
+  }
+
+  /// Show explanation dialog about the wakelock function
+  void _showWakelockDialog() {
+    final infoText =
+        (AppController.to.settingsService.appSettings.wakelockEnabled)
+        ? "The wakelock feature is currently enabled. Fokus will keep the display from shutting off during session. You can change this in settings."
+        : "The wakelock feature is currently disabled. Your display may shut off. You can prevent this by enabling wakelock in settings.";
+
+    Get.dialog(
+      InfoDialog(
+        titleText: "Wakelock",
+        description: infoText,
+        onConfirm: Get.back,
+      ),
+    );
   }
 
   Widget _buildLampSection() {
@@ -243,6 +276,7 @@ class _SessionPageState extends State<SessionPage> {
 
   @override
   void initState() {
+    // If there is a session running, restore it
     if (!_appCtl.sessionIsRunning.value) return;
 
     Duration durationRestored = DateTime.now().difference(
@@ -253,6 +287,8 @@ class _SessionPageState extends State<SessionPage> {
     _lampImage = Const.assetMapping.lampOn;
 
     _startTimers(initialSeconds: durationRestored.inSeconds);
+
+    _setupWakelock();
 
     super.initState();
   }
@@ -275,6 +311,17 @@ class _SessionPageState extends State<SessionPage> {
         centerTitle: true,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
+        actions: [
+          IconButton(
+            onPressed: _showWakelockDialog,
+            icon: Icon(
+              Icons.remove_red_eye_outlined,
+              color: _wakelockIsActive
+                  ? Color(Const.assetMapping.lampColor)
+                  : Colors.grey,
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
