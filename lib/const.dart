@@ -18,6 +18,7 @@ class _AssetMapping {
   // Lamp image
   final String lampOn = "assets/table-lamp-on.png";
   final String lampOff = "assets/table-lamp-off.png";
+  final int lampColor = 0xaafec165;
 }
 
 class _StorageKeys {
