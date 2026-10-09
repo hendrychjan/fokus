@@ -2,10 +2,20 @@
 
 Forest 2.0
 
-## Mockup
-![](resources/mockup/mockup.drawio.png)
+## Development
 
-## Info for developers
+### Commands
+To run drift migration (generate database backend):
+
+```
+dart run build_runner build
+```
+
+To generate launcher icons:
+
+```
+dart run flutter_launcher_icons
+```
 
 ### Creating a form
 To achieve consistency in code, all forms throughout the application are components. Those components, except maybe for a few exceptions, that do not reflect an object, use `FormBase` as their parent class to achieve consistency in their interface.

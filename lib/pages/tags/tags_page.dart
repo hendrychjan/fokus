@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:fokus/components/form/form_base.dart';
+import 'package:fokus/database/app_database.dart';
 import 'package:fokus/forms/tag_form.dart';
-import 'package:fokus/models/tag.dart';
+import 'package:fokus/repository/tag_repository.dart';
+import 'package:fokus/services/app_controller.dart';
 import 'package:get/get.dart';
 
 class TagsPage extends StatelessWidget {
   TagsPage({super.key});
+
+  TagRepository get _tagRepository => AppController.to.tagRepository;
 
   final GlobalKey<FormState> createTagFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> updateTagFormKey = GlobalKey<FormState>();
 
   /// Create/update a tag the database
   Future<void> _handleSaveTag(Tag tag) async {
-    await tag.save();
+    await _tagRepository.save(tag);
     Get.back();
   }
 
   /// Delete a tag from the database
   Future<void> _handleDeleteTag(Tag tag) async {
-    await tag.delete();
+    await _tagRepository.delete(tag);
     Get.back();
   }
 
@@ -76,7 +80,7 @@ class TagsPage extends StatelessWidget {
         child: Icon(Icons.add),
       ),
       body: StreamBuilder<List<Tag>>(
-        stream: Tag.getAllStream(),
+        stream: _tagRepository.getAllStream(),
         builder: (context, snapshot) {
           // Check the stream state
           if (snapshot.connectionState == ConnectionState.waiting) {

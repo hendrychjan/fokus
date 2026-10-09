@@ -9,7 +9,7 @@ class InitService {
     _initControllers();
 
     // Initialize database engines
-    await Future.wait([_initIsar(), _initStorage()]);
+    await Future.wait([_initStorage()]);
 
     // Attempt to restore previous sessions
     AppController.to.settingsService.loadAndApplySettings();
@@ -19,11 +19,6 @@ class InitService {
   /// Run all getx state management init tasks
   static void _initControllers() {
     Get.put(AppController());
-  }
-
-  /// Run all Isar database related init tasks
-  static Future<void> _initIsar() async {
-    await AppController.to.isarService.initialize();
   }
 
   /// Run all GetStorage database related init tasks
