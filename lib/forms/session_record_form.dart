@@ -1,16 +1,22 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
+import 'package:fokus/components/form/async_multiselect_form_field.dart';
 import 'package:fokus/components/form/date_time_form_field.dart';
 import 'package:fokus/components/form/form_base.dart';
 import 'package:fokus/components/form/spacer_form_field.dart';
-import 'package:fokus/components/form/multiselect_form_field.dart';
-import 'package:fokus/models/session_record.dart';
-import 'package:fokus/models/tag.dart';
+import 'package:fokus/database/app_database.dart';
+import 'package:fokus/services/app_controller.dart';
+
+typedef SessionRecordFormData = ({SessionRecord record, List<Tag> tags});
 
 class SessionRecordForm extends StatelessWidget {
   /// Form configuration
-  final FormConfig<SessionRecord> config;
+  final FormConfig<SessionRecordFormData> config;
 
   SessionRecordForm({super.key, required this.config});
+
+  /// Shortcut to app controller
+  AppController get _appCtl => AppController.to;
 
   // Form field controllers
   final TextEditingController _sessionStartController = TextEditingController();
@@ -20,25 +26,34 @@ class SessionRecordForm extends StatelessWidget {
 
   /// Maps the initialValue to form fields
   Future<void> _mapObjectToForm() async {
-    _sessionStartController.text = config.initialValue!.sessionStart
+    _sessionStartController.text = config.initialValue!.record.sessionStart
         .toIso8601String();
-    _sessionEndController.text = config.initialValue!.sessionEnd
+    _sessionEndController.text = config.initialValue!.record.sessionEnd
         .toIso8601String();
-    _noteController.text = config.initialValue!.note ?? "";
+    _noteController.text = config.initialValue!.record.note ?? "";
     _tagsController.addAll(config.initialValue!.tags);
   }
 
   /// Maps the form field values to a result object
-  SessionRecord _mapFormToObject(SessionRecord? initial) {
-    SessionRecord sessionRecord = initial ?? SessionRecord();
+  SessionRecordFormData _mapFormToObject(SessionRecordFormData? initial) {
+    final sessionStart = DateTime.parse(_sessionStartController.text);
+    final sessionEnd = DateTime.parse(_sessionEndController.text);
+    final note = _noteController.text;
 
-    sessionRecord.sessionStart = DateTime.parse(_sessionStartController.text);
-    sessionRecord.sessionEnd = DateTime.parse(_sessionEndController.text);
-    sessionRecord.note = _noteController.text;
-    sessionRecord.tags.clear();
-    sessionRecord.tags.addAll(_tagsController);
-
-    return sessionRecord;
+    return (
+      record:
+          initial?.record.copyWith(
+            sessionStart: sessionStart,
+            sessionEnd: sessionEnd,
+            note: drift.Value<String?>(note),
+          ) ??
+          SessionRecord(
+            id: 0,
+            sessionStart: sessionStart,
+            sessionEnd: sessionEnd,
+          ),
+      tags: _tagsController,
+    );
   }
 
   /// Defines the actual content of the form
@@ -80,8 +95,8 @@ class SessionRecordForm extends StatelessWidget {
           ),
         ),
         SpacerFormField(),
-        MultiselectFormField<Tag>(
-          options: Tag.getAllSync(),
+        AsyncMultiselectFormField<Tag>(
+          getOptions: _appCtl.tagRepository.getAll(),
           initialValue: _tagsController,
           itemTitleBuilder: (Tag t) => t.title,
           decoration: InputDecoration(
@@ -103,7 +118,7 @@ class SessionRecordForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FormBase<SessionRecord>(
+    return FormBase<SessionRecordFormData>(
       config: config,
       objectToFormMapper: _mapObjectToForm,
       formToObjectMapper: _mapFormToObject,

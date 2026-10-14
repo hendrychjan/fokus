@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:fokus/components/form/form_base.dart';
+import 'package:fokus/database/app_database.dart';
 import 'package:fokus/forms/session_record_form.dart';
-import 'package:fokus/models/session_record.dart';
+import 'package:fokus/repository/session_record_repository.dart';
 import 'package:fokus/services/app_controller.dart';
 import 'package:get/get.dart';
 
 class HistoryPage extends StatelessWidget {
   HistoryPage({super.key});
+
+  SessionRecordRepository get _sessionRecordRepository =>
+      AppController.to.sessionRecordRepository;
 
   final GlobalKey<FormState> createSessionRecordFormKey =
       GlobalKey<FormState>();
@@ -14,14 +18,19 @@ class HistoryPage extends StatelessWidget {
       GlobalKey<FormState>();
 
   /// Create/update a session record in the database
-  Future<void> _handleSaveSessionRecord(SessionRecord sessionRecord) async {
-    await sessionRecord.save();
+  Future<void> _handleSaveSessionRecord(
+    SessionRecordFormData sessionRecordFormData,
+  ) async {
+    await _sessionRecordRepository.save(
+      sessionRecordFormData.record,
+      tags: sessionRecordFormData.tags,
+    );
     Get.back();
   }
 
   /// Delete a session record from the database
   Future<void> _handleDeleteSessionRecord(SessionRecord sessionRecord) async {
-    await sessionRecord.delete();
+    await _sessionRecordRepository.delete(sessionRecord);
     Get.back();
   }
 
@@ -41,16 +50,19 @@ class HistoryPage extends StatelessWidget {
   }
 
   /// Open a dialog for editing session records
-  void _openEditDialog(SessionRecord sessionRecord) {
+  void _openEditDialog(SessionRecord sessionRecord) async {
+    final tags = await _sessionRecordRepository.getTags(sessionRecord);
+
     Get.to(
       () => SessionRecordForm(
         config: FormConfig(
           formKey: updateSessionRecordFormKey,
           submitText: "Update",
           title: "Update a record",
-          initialValue: sessionRecord,
+          initialValue: (record: sessionRecord, tags: tags),
           onSubmit: _handleSaveSessionRecord,
-          onDelete: _handleDeleteSessionRecord,
+          onDelete: (SessionRecordFormData x) =>
+              _handleDeleteSessionRecord(x.record),
         ),
       ),
     );
@@ -74,10 +86,6 @@ class HistoryPage extends StatelessWidget {
     }
 
     final sessionRecord = sessionRecords[index];
-    final tags = [];
-    for (var tag in sessionRecord.tags) {
-      tags.add(Text(tag.title, style: TextStyle(color: Color(tag.colorARGB))));
-    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,23 +121,37 @@ class HistoryPage extends StatelessWidget {
                 ),
               ],
             ),
-            subtitle: (sessionRecord.tags.isNotEmpty)
-                ? Row(
-                    children: sessionRecord.tags
-                        .map(
-                          (t) => Row(
-                            children: [
-                              Text(
-                                t.title,
-                                style: TextStyle(color: Color(t.colorARGB)),
-                              ),
-                              SizedBox(width: 8),
-                            ],
-                          ),
+            subtitle: FutureBuilder<List<Tag>>(
+              future: _sessionRecordRepository.getTags(sessionRecord),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return (snapshot.data!.isNotEmpty)
+                      ? Row(
+                          children: snapshot.data!
+                              .map(
+                                (t) => Row(
+                                  children: [
+                                    Text(
+                                      t.title,
+                                      style: TextStyle(
+                                        color: Color(t.colorARGB),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                  ],
+                                ),
+                              )
+                              .toList(),
                         )
-                        .toList(),
-                  )
-                : Text("No tags...", style: TextStyle(color: Colors.grey)),
+                      : Text(
+                          "No tags...",
+                          style: TextStyle(color: Colors.grey),
+                        );
+                }
+
+                return Text("Loading tags...");
+              },
+            ),
             trailing: Icon(Icons.arrow_right),
           ),
         ),
@@ -146,7 +168,7 @@ class HistoryPage extends StatelessWidget {
         child: Icon(Icons.add),
       ),
       body: StreamBuilder<List<SessionRecord>>(
-        stream: SessionRecord.getAllByDateStream().map(
+        stream: _sessionRecordRepository.getAllByDateStream().map(
           (list) => list.reversed.toList(),
         ),
         builder: (context, snapshot) {

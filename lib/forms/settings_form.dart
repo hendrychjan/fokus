@@ -12,6 +12,8 @@ class SettingsForm extends StatefulWidget {
 }
 
 class _SettingsFormState extends State<SettingsForm> {
+  final _appCtl = AppController.to;
+
   final List<_SelectOption<ThemeMode>> _themeTypeOptions = [
     _SelectOption("System", ThemeMode.system),
     _SelectOption("Light", ThemeMode.light),
@@ -31,9 +33,9 @@ class _SettingsFormState extends State<SettingsForm> {
     if (modeOpt == null) return;
 
     // Save wakelock mode settings
-    AppController.to.settingsService.appSettings.wakelockEnabled =
-        modeOpt.value;
-    AppController.to.settingsService.appSettings.save();
+    _appCtl.settingsService.appSetting = _appCtl.settingsService.appSetting
+        .copyWith(wakelockEnabled: modeOpt.value);
+    _appCtl.appSettingsRepository.save(_appCtl.settingsService.appSetting);
 
     setState(() {
       _wakelockModeController = modeOpt.value;
@@ -44,9 +46,10 @@ class _SettingsFormState extends State<SettingsForm> {
     if (modeOpt == null) return;
 
     // Save and apply theme mode
-    AppController.to.settingsService.appSettings.themeMode = modeOpt.value;
-    AppController.to.settingsService.saveSettings();
-    AppController.to.settingsService.updateAppTheme();
+    _appCtl.settingsService.appSetting = _appCtl.settingsService.appSetting
+        .copyWith(themeMode: modeOpt.value);
+    _appCtl.appSettingsRepository.save(_appCtl.settingsService.appSetting);
+    _appCtl.settingsService.updateAppTheme();
 
     setState(() {
       _themeModeController = modeOpt.value;
@@ -55,24 +58,22 @@ class _SettingsFormState extends State<SettingsForm> {
 
   void _handleChangeColor(Color color) {
     // Save and apply theme mode
-    AppController.to.settingsService.appSettings.themeSeedColorARGB = color
-        .toARGB32();
-    AppController.to.settingsService.saveSettings();
-    AppController.to.settingsService.updateAppTheme();
+    _appCtl.settingsService.appSetting = _appCtl.settingsService.appSetting
+        .copyWith(themeSeedColorARGB: color.toARGB32());
+    _appCtl.appSettingsRepository.save(_appCtl.settingsService.appSetting);
+    _appCtl.settingsService.updateAppTheme();
   }
 
   @override
   void initState() {
-    _themeModeController =
-        AppController.to.settingsService.appSettings.themeMode;
-    _themeColorController.text = AppController
-        .to
+    _themeModeController = _appCtl.settingsService.appSetting.themeMode;
+    _themeColorController.text = _appCtl
         .settingsService
-        .appSettings
+        .appSetting
         .themeSeedColorARGB
         .toRadixString(16);
     _wakelockModeController =
-        AppController.to.settingsService.appSettings.wakelockEnabled;
+        _appCtl.settingsService.appSetting.wakelockEnabled;
 
     super.initState();
   }

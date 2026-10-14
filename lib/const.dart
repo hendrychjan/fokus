@@ -9,6 +9,7 @@ class Const {
 
   static const storageKeys = _StorageKeys();
   static const defaults = _Defaults();
+  static const config = _Config();
   static const assetMapping = _AssetMapping();
 }
 
@@ -63,6 +64,14 @@ class _Defaults {
     Weekday(number: 6, label: 'Sat'),
     Weekday(number: 7, label: 'Sun'),
   ];
+}
+
+class _Config {
+  const _Config();
+
+  // Database related
+  final int schemaVersion = 2;
+  final String databaseName = "fokus_drift_database";
 }
 
 class Weekday {

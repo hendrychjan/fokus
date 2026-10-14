@@ -4,8 +4,8 @@ import 'package:fokus/components/confirm_dialog.dart';
 import 'package:fokus/components/form/form_base.dart';
 import 'package:fokus/components/info_dialog.dart';
 import 'package:fokus/const.dart';
+import 'package:fokus/database/app_database.dart';
 import 'package:fokus/forms/session_record_form.dart';
-import 'package:fokus/models/session_record.dart';
 import 'package:fokus/services/app_controller.dart';
 import 'package:get/get.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -29,6 +29,12 @@ class _SessionPageState extends State<SessionPage> {
   /// A source for the lamp image - changes dynamically based on session state
   String _lampImage = Const.assetMapping.lampOff;
 
+  int get _selectedTagIndex => _appCtl.selectedTagIndex.value;
+  Tag get _selectedTag => _appCtl.cachedTags.value[_selectedTagIndex];
+  Duration get _selectedTagDurationToday =>
+      _appCtl.cachedRecordedDurationsByTag.value[_selectedTag.id] ??
+      Duration.zero;
+
   /// Scheduler for updating the timer display
   late Timer _sessionTimer;
 
@@ -39,7 +45,7 @@ class _SessionPageState extends State<SessionPage> {
 
   /// Enable wakelock if allowed in settings
   void _setupWakelock() {
-    if (AppController.to.settingsService.appSettings.wakelockEnabled) {
+    if (_appCtl.settingsService.appSetting.wakelockEnabled) {
       WakelockPlus.enable();
       setState(() {
         _wakelockIsActive = true;
@@ -101,10 +107,12 @@ class _SessionPageState extends State<SessionPage> {
   void _handleStopSession() {
     if (!_appCtl.sessionIsRunning.value) return;
 
-    SessionRecord sessionRecord = SessionRecord();
-    sessionRecord.sessionStart = _appCtl.sessionStart.value!;
-    sessionRecord.sessionEnd = DateTime.now();
-    sessionRecord.note = "";
+    final sessionRecord = SessionRecord(
+      id: 0,
+      sessionStart: _appCtl.sessionStart.value!,
+      sessionEnd: DateTime.now(),
+      note: "",
+    );
 
     Get.to(
       () => SessionRecordForm(
@@ -112,10 +120,13 @@ class _SessionPageState extends State<SessionPage> {
           formKey: _saveSessionRecordFormKey,
           submitText: "Save",
           title: "Save session record",
-          initialValue: sessionRecord,
+          initialValue: (record: sessionRecord, tags: []),
           onSubmit: (sessionRecord) async {
-            sessionRecord.save();
-            _appCtl.sessionService.stopSession();
+            await _appCtl.sessionRecordRepository.save(
+              sessionRecord.record,
+              tags: sessionRecord.tags,
+            );
+            await _appCtl.sessionService.stopSession();
             _stopTimers();
 
             // Set the lamp mode to "on"
@@ -201,8 +212,7 @@ class _SessionPageState extends State<SessionPage> {
 
   /// Show explanation dialog about the wakelock function
   void _showWakelockDialog() {
-    final infoText =
-        (AppController.to.settingsService.appSettings.wakelockEnabled)
+    final infoText = (_appCtl.settingsService.appSetting.wakelockEnabled)
         ? "The wakelock feature is currently enabled. Fokus will keep the display from shutting off during session. You can change this in settings."
         : "The wakelock feature is currently disabled. Your display may shut off. You can prevent this by enabling wakelock in settings.";
 
@@ -217,21 +227,82 @@ class _SessionPageState extends State<SessionPage> {
 
   Widget _buildLampSection() {
     return FractionallySizedBox(
-      widthFactor: 0.8,
+      heightFactor: 0.8,
       child: Image.asset(_lampImage, fit: BoxFit.contain),
     );
   }
 
   Widget _buildProgressSection() {
-    return Column(
-      children: [
-        FractionallySizedBox(
-          widthFactor: 0.5,
-          child: LinearProgressIndicator(value: 2 / 5),
+    return Obx(() {
+      if (_appCtl.cachedTags.value.isEmpty) {
+        return Text("Create tags to track daily goals.");
+      }
+
+      final double progress = (_selectedTag.goal != null)
+          ? ((_selectedTagDurationToday.inMinutes.toDouble() +
+                    (_seconds / 60)) /
+                _selectedTag.goal!.toDouble())
+          : 1;
+      final String progressText = (_selectedTag.goal != null)
+          ? "${_selectedTag.goal! - (_selectedTagDurationToday.inMinutes + (_seconds / 60).floor())} minutes left"
+          : "No goal set.";
+
+      return Center(
+        child: GestureDetector(
+          onHorizontalDragEnd: (details) {
+            final velocity = details.primaryVelocity ?? 0;
+
+            if (velocity < -200) {
+              // left
+              _appCtl.selectedTagIndex.value++;
+            } else if (velocity > 200) {
+              // right
+              _appCtl.selectedTagIndex.value--;
+            }
+          },
+          child: Row(
+            children: [
+              Visibility(
+                visible: _selectedTagIndex > 0,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: IconButton(
+                  onPressed: () => _appCtl.selectedTagIndex.value--,
+                  icon: Icon(Icons.arrow_left),
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      _appCtl.cachedTags.value[_selectedTagIndex].title,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    LinearProgressIndicator(value: progress),
+                    Text(
+                      progressText,
+                      style: TextStyle(fontWeight: FontWeight.w300),
+                    ),
+                  ],
+                ),
+              ),
+              Visibility(
+                visible:
+                    _selectedTagIndex < (_appCtl.cachedTags.value.length - 1),
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: IconButton(
+                  onPressed: () => _appCtl.selectedTagIndex.value++,
+                  icon: Icon(Icons.arrow_right),
+                ),
+              ),
+            ],
+          ),
         ),
-        Text("2/5 goals completed today"),
-      ],
-    );
+      );
+    });
   }
 
   Widget _buildTimerSection() {
@@ -295,7 +366,7 @@ class _SessionPageState extends State<SessionPage> {
 
   @override
   void dispose() {
-    if (AppController.to.sessionIsRunning.value) _sessionTimer.cancel();
+    if (_appCtl.sessionIsRunning.value) _sessionTimer.cancel();
 
     // Always disable wakeclock when leaving session page
     WakelockPlus.disable();
@@ -326,12 +397,13 @@ class _SessionPageState extends State<SessionPage> {
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _buildLampSection(),
+            Expanded(child: _buildLampSection()),
             _buildTimerSection(),
-            // _buildProgressSection(),
+            SizedBox(height: 20),
+            _buildProgressSection(),
           ],
         ),
       ),
